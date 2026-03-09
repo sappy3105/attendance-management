@@ -1,0 +1,59 @@
+.verify__container {
+    padding: 100px 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 120px);
+    box-sizing: border-box;
+}
+
+.verify__content {
+    text-align: center;
+}
+
+.verify__text {
+    font-size: 18px;
+    font-weight: bold;
+    line-height: 2.0;
+    margin-bottom: 50px;
+}
+
+/* 「認証はこちらから」ボタン */
+.verify__button {
+    display: inline-block;
+    text-decoration: none;
+    background-color: #e0e0e0;
+    color: #000;
+    border: 1px solid #333;
+    padding: 12px 60px;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 3px;
+    text-align: center;
+    cursor: pointer;
+}
+
+/* 再送リンク */
+.verify__re-send-form {
+    margin-top: 30px;
+}
+
+.verify__re-send-link {
+    background: none;
+    border: none;
+    color: #007bff;
+    text-decoration: none;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 0;
+}
+
+.verify__re-send-link:hover {
+    text-decoration: underline;
+}
+
+.verify__alert {
+    margin-top: 20px;
+    color: #d9534f;
+    font-size: 14px;
+}

@@ -1,0 +1,63 @@
+.login-form__content {
+    max-width: 450px;
+    margin: 80px auto;
+    text-align: center;
+}
+
+.login-form__heading {
+    font-size: 28px;
+    margin-bottom: 40px;
+    font-weight: bold;
+}
+
+.login-form__group {
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.login-form__label {
+    display: block;
+    font-weight: bold;
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
+.login-form__input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #000;
+    border-radius: 3px;
+    box-sizing: border-box;
+    font-size: 16px;
+}
+
+.login-form__error-message {
+    color: #ff4d4b;
+    font-size: 14px;
+    height: 25px;
+    margin-top: 5px;
+}
+
+.login-form__button-submit {
+    width: 100%;
+    padding: 15px;
+    background-color: #000;
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 30px;
+}
+
+/* 下部リンク */
+.register__link {
+    margin-top: 25px;
+}
+
+.register__button {
+    color: #007bff;
+    text-decoration: none;
+    font-size: 16px;
+}

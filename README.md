@@ -138,8 +138,8 @@ exit
 
 ## 使用技術（実行環境）
 
-- PHP 8.1.34
-- Laravel 8.83.29
+- PHP 8.3.30
+- Laravel 12.53.0
 - MySQL 8.0.26
 - nginx 1.21.1
 

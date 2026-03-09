@@ -15,4 +15,9 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 RUN curl -sL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs
 
+ARG UID=1000
+RUN useradd -u ${UID} -G www-data -m satoko
 WORKDIR /var/www
+RUN chown -R satoko:www-data /var/www
+
+USER satoko

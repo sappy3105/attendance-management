@@ -14,5 +14,10 @@ export default defineConfig({
         watch: {
             ignored: ['**/storage/framework/views/**'],
         },
+
+        host: '0.0.0.0', // すべての接続を許可
+        hmr: {
+            host: 'localhost', // ブラウザからはlocalhostとしてアクセスさせる
+        },
     },
 });

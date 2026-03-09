@@ -1,0 +1,40 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('attendances', function (Blueprint $table) {
+            $table->id();
+            // 誰の勤怠か
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+
+            // 日付（勤怠一覧や月次表示の検索に使用）
+            $table->date('date');
+
+            // 出勤・退勤時間（秒単位まで保持できる time 型が扱いやすいです）
+            $table->time('check_in')->nullable();
+            $table->time('check_out')->nullable();
+
+            // 備考（管理者修正時や申請時に必要になる要件があります）
+            $table->text('remarks')->nullable();
+
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('attendances');
+    }
+};

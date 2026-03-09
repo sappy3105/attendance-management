@@ -1,0 +1,200 @@
+.header {
+    background-color: #000;
+    height: 60px;
+    width: 100%;
+}
+
+.header__inner {
+    width: 100%;
+    height: 100%;
+    max-width: 1400px;/* 幅1400pxに制限 */
+    margin: 0 auto;
+    padding: 0 20px;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.main {
+    width: 100%;
+}
+
+.main__inner {
+    width: 100%;
+    max-width: 1400px;/* 幅1400pxに制限 */
+    margin: 0 auto;
+    padding: 0 20px;
+    box-sizing: border-box;
+}
+
+/* ロゴサイズ固定 */
+.header__logo {
+    height: 30px;
+    display: block;
+}
+
+/* ナビゲーションエリア全体 */
+.header__nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-grow: 1;
+    margin-left: 40px;
+}
+
+/* 検索フォーム */
+.header__search {
+    width: 100%;
+    max-width: 400px;
+}
+
+.header__search-input {
+    width: 100%;
+    height: 36px;
+    border-radius: 3px;
+    border: none;
+    padding: 0 20px;
+    font-size: 18px;
+    box-sizing: border-box;
+}
+
+/* ナビゲーションリスト（ログアウト・マイページ・出品） */
+.header__nav-list {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+/* リンク文字（マイページ・ログイン・ログアウト）共通設定 */
+.header__nav-link {
+    display: inline-block;
+    color: #fff;
+    text-decoration: none;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    font-family: inherit;
+    line-height: 1;
+}
+
+/* 出品ボタン */
+.header__nav-btn {
+    background-color: #fff;
+    color: #000;
+    font-size: 18px;
+    font-weight: bold;
+    text-decoration: none;
+    padding: 8px 18px;
+    border-radius: 3px;
+    display: inline-block;
+}
+
+/* Soldラベル(共通) */
+.sold-label {
+    color: #ff4d4b;
+    font-weight: bold;
+    margin-left: 10px;
+}
+
+/* セレクトボックス (共通) */
+.select-wrapper {
+    position: relative;
+    width: 100%;
+    /* 基本は100%にしておく */
+}
+
+.hidden-select {
+    display: none;
+}
+
+/* 閉じている状態の枠 */
+.select-trigger {
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    /* paddingを含めた幅計算 */
+}
+
+.trigger-text.is-placeholder {
+    color: #888;
+}
+
+/* 逆三角形 */
+.select-wrapper::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: 15px;
+    transform: translateY(-50%);
+    border-top: 10px solid #333;
+    border-right: 6px solid transparent;
+    border-left: 6px solid transparent;
+    pointer-events: none;
+    z-index: 5;
+}
+
+.select-wrapper.is-open::after {
+    display: none;
+}
+
+/* ドロップダウンリスト（展開時） */
+.custom-options {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    background-color: #555;
+    border-radius: 3px;
+    display: none;
+    z-index: 100;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* openクラスがついたら表示 */
+.select-wrapper.is-open .custom-options {
+    display: block;
+}
+
+/*  ?　*/
+.custom-option:first-child {
+    padding-top: 12px;
+}
+
+/* 各選択肢 */
+.custom-option {
+    padding: 12px 15px 12px 35px;
+    color: #fff;
+    cursor: pointer;
+    position: relative;
+    transition: background 0.2s;
+}
+
+.custom-option:hover {
+    background-color: #666;
+}
+
+/* 選択中の青背景 */
+.custom-option.selected {
+    background-color: #4A90E2;
+    /* 購入画面の青に統一、または出品画面の青(#5897fb)に統一 */
+}
+
+/* チェックマーク */
+.custom-option.selected::before {
+    content: "✓";
+    position: absolute;
+    left: 12px;
+    font-weight: bold;
+}
