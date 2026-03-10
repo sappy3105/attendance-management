@@ -1,0 +1,57 @@
+.attendance__content {
+    max-width: 600px;
+    margin: 100px auto;
+    text-align: center;
+}
+
+/* ステータスラベル（勤務外、出勤中など） */
+.attendance__status {
+    display: inline-block;
+    background-color: #ccc;
+    color: #555;
+    padding: 5px 20px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 30px;
+}
+
+/* 日付 */
+.attendance__date {
+    font-size: 32px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+/* 時刻（大きく表示） */
+.attendance__time {
+    font-size: 80px;
+    font-weight: bold;
+    margin-bottom: 60px;
+    letter-spacing: 5px;
+}
+
+/* 打刻ボタン共通 */
+.attendance__button-submit {
+    width: 200px;
+    padding: 15px;
+    background-color: #000;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: opacity 0.3s;
+}
+
+.attendance__button-submit:hover {
+    opacity: 0.8;
+}
+
+/* ボタンが押せない状態 */
+.attendance__button-submit:disabled {
+    background-color: #eee;
+    color: #aaa;
+    cursor: not-allowed;
+}

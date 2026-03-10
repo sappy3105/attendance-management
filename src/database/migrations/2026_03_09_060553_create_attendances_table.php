@@ -23,6 +23,9 @@ return new class extends Migration
             $table->time('check_in')->nullable();
             $table->time('check_out')->nullable();
 
+            // ステータス管理（1:勤務外, 2:出勤中, 3:休憩中, 4:退勤済）
+            $table->tinyInteger('status')->default(1)->comment('1:勤務外, 2:出勤中, 3:休憩中, 4:退勤済');
+
             // 備考（管理者修正時や申請時に必要になる要件があります）
             $table->text('remarks')->nullable();
 
