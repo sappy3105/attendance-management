@@ -1,0 +1,107 @@
+.attendance-list{
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: left;
+    margin-top: 60px;
+}
+
+.attendance-list__heading {
+    border-left: 5px solid #000;
+    padding-left: 15px;
+    margin-bottom: 30px;
+    font-size: 24px;
+}
+
+.attendance-list__nav{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #fff;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 50px;
+}
+
+/* ページネーション */
+.nav-button{
+    color: #6c6b6b;
+    font-weight: bold;
+    letter-spacing: 2px;
+    text-decoration: none;
+}
+
+/* カレンダーアイコン */
+.month-picker {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.hidden-month-input {
+    position: absolute;
+    width: 0;
+    height: 0;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.month-display {
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    padding: 5px 10px;
+}
+
+.calendar-trigger-icon{
+    width: 24px;
+    height: 24px;
+    vertical-align: middle;
+    margin-right: 8px;
+    pointer-events: none;
+}
+
+/* テーブル */
+.attendance-table {
+    width: 100%;
+    background: #fff;
+    border-collapse: collapse;
+    border-radius: 10px;
+    overflow: hidden;
+    letter-spacing: 2px;
+}
+
+.attendance-table th,
+.attendance-table td {
+    padding: 15px 20px;
+    text-align: center;
+    color: #6c6b6b;
+    font-weight: bold;
+}
+
+.attendance-table th:first-child,
+.attendance-table td:first-child {
+    padding-left: 30px;
+}
+
+.attendance-table th:last-child,
+.attendance-table td:last-child {
+    padding-right: 30px;
+}
+
+.attendance-table th{
+    border-bottom: 5px solid #eee;
+}
+
+.attendance-table td {
+    border-bottom: 3px solid #eee;
+}
+
+.attendance-table__detail-link{
+    text-decoration: none;
+    color: #000;
+    font-weight: bold;
+}
+
+

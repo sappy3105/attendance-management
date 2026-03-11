@@ -38,7 +38,7 @@
     background-color: #000;
     color: #fff;
     border: none;
-    border-radius: 10px;
+    border-radius: 15px;
     font-size: 20px;
     font-weight: bold;
     cursor: pointer;
@@ -54,4 +54,30 @@
     background-color: #eee;
     color: #aaa;
     cursor: not-allowed;
+}
+
+.attendance__button-group {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+}
+
+/* 休憩入ボタン（白背景のスタイル） */
+.attendance__button-rest {
+    width: 200px;
+    padding: 15px;
+    background-color: #fff;
+    color: #000;
+    border: 1px solid #eee;
+    border-radius: 15px;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.attendance__message {
+    margin-top: 50px;
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
 }

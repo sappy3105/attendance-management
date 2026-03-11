@@ -13,7 +13,7 @@
     <header class="header">
         <div class="header__inner">
             <div class="header__heading">
-                <a href="/">
+                <a href="/attendance">
                     <img src="{{ asset('images/COACHTECH_headerlogo.png') }}" alt="COACHTECH" class="header__logo">
                 </a>
             </div>
@@ -24,7 +24,7 @@
                     <ul class="header__nav-list">
                         @auth
                             <li><a href="" class="header__nav-link">勤怠</a></li>
-                            <li><a href="" class="header__nav-link">勤怠一覧</a></li>
+                            <li><a href="/attendance/list" class="header__nav-link">勤怠一覧</a></li>
                             <li><a href="" class="header__nav-link">申請</a></li>
                             <li>
                                 {{-- ログインしている時 --}}
