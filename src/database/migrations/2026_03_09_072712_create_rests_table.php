@@ -18,8 +18,8 @@ return new class extends Migration
             $table->foreignId('attendance_id')->constrained()->cascadeOnDelete();
 
             // 休憩開始・終了時間
-            $table->time('start_time');
-            $table->time('end_time')->nullable(); // 休憩中は null になるため
+            $table->time('break_start');
+            $table->time('break_end')->nullable(); // 休憩中は null になるため
 
             $table->timestamps();
         });

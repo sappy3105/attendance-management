@@ -17,12 +17,12 @@
 
         {{-- 現在の日付 --}}
         <div class="attendance__date">
-            {{ \Carbon\Carbon::now()->isoFormat('YYYY年M月D日(ddd)') }}
+            {{ now()->isoFormat('YYYY年M月D日(ddd)') }}
         </div>
 
         {{-- 現在の時刻 --}}
         <div class="attendance__time">
-            {{ \Carbon\Carbon::now()->format('H:i') }}
+            {{ now()->format('H:i') }}
         </div>
 
         {{-- 打刻フォーム --}}

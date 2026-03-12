@@ -1,0 +1,104 @@
+.attendance-detail {
+    max-width: 800px;
+    margin: 60px auto;
+    padding: 0 20px;
+}
+
+.attendance-detail__heading {
+    border-left: 5px solid #000;
+    padding-left: 15px;
+    margin-bottom: 30px;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.attendance-detail__table {
+    width: 100%;
+    background: #fff;
+    border-collapse: collapse;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.attendance-detail__row {
+    border-bottom: 1px solid #eee;
+}
+
+.attendance-detail__row:last-child {
+    border-bottom: none;
+}
+
+.attendance-detail__label {
+    width: 30%;
+    padding: 25px 20px;
+    background-color: #fff;
+    text-align: left;
+    color: #6c6b6b;
+    font-weight: bold;
+}
+
+.attendance-detail__value {
+    padding: 20px;
+    background-color: #fff;
+}
+
+.attendance-detail__user-name,
+.attendance-detail__date-text {
+    font-size: 18px;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+/* 入力エリアのスタイル */
+.attendance-detail__time-group {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.attendance-detail__input {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    font-family: inherit;
+    color: #333;
+    width: 130px;
+    text-align: center;
+}
+
+.attendance-detail__separator {
+    font-weight: bold;
+}
+
+.attendance-detail__textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    resize: none;
+    box-sizing: border-box;
+}
+
+/* ボタンエリア */
+.attendance-detail__actions {
+    margin-top: 40px;
+    text-align: center;
+}
+
+.attendance-detail__submit-btn {
+    background-color: #000;
+    color: #fff;
+    border: none;
+    padding: 12px 60px;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.attendance-detail__submit-btn:hover {
+    opacity: 0.8;
+}

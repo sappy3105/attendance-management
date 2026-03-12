@@ -5,17 +5,18 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Attendance extends Model
+class AttendanceCorrectRequest extends Model
 {
     use HasFactory;
 
     protected $fillable = [
+        'attendance_id',
         'user_id',
         'date',
         'check_in',
         'check_out',
-        'status',
         'remarks',
+        'status',
     ];
 
     protected $casts = [
@@ -23,9 +24,4 @@ class Attendance extends Model
         'check_in' => 'datetime',
         'check_out' => 'datetime',
     ];
-
-    public function rests()
-    {
-        return $this->hasMany(Rest::class);
-    }
 }

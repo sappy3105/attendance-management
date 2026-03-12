@@ -2,15 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use App\Models\User;
 use App\Models\Attendance;
 use App\Models\Rest;
+use App\Models\AttendanceCorrectRequest;
+use App\Models\RestCorrectRequest;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
 class AttendanceController extends Controller
 {
-    //勤務外
+    /** 勤務外 */
     public function index()
     {
         // 今日の日付を取得
@@ -24,7 +28,7 @@ class AttendanceController extends Controller
         return view('attendance', compact('attendance'));
     }
 
-    //出勤ボタン押下
+    /** 出勤ボタン押下 */
     public function workStart(Request $request)
     {
         $userId = Auth::id();
@@ -46,11 +50,11 @@ class AttendanceController extends Controller
         return redirect()->back();
     }
 
-    //休憩入ボタン押下
+    /** 休憩入ボタン押下 */
     public function restStart(Request $request)
     {
         $userId = Auth::id();
-        $today = \Carbon\Carbon::today()->format('Y-m-d');
+        $today = Carbon::today()->format('Y-m-d');
 
         // 今日の勤怠レコードを取得
         $attendance = Attendance::where('user_id', $userId)
@@ -61,7 +65,7 @@ class AttendanceController extends Controller
             // 1. restsテーブルに開始時刻を保存
             Rest::create([
                 'attendance_id' => $attendance->id,
-                'start_time' => \Carbon\Carbon::now()->format('H:i:s'),
+                'break_start' => Carbon::now()->format('H:i:s'),
             ]);
 
             // 2. attendancesテーブルのステータスを「休憩中」に更新
@@ -73,11 +77,11 @@ class AttendanceController extends Controller
         return redirect()->back();
     }
 
-    //休憩戻ボタン押下
+    /** 休憩戻ボタン押下 */
     public function restEnd(Request $request)
     {
         $userId = Auth::id();
-        $today = \Carbon\Carbon::today()->format('Y-m-d');
+        $today = Carbon::today()->format('Y-m-d');
 
         // 今日の勤怠レコードを取得
         $attendance = Attendance::where('user_id', $userId)
@@ -85,16 +89,16 @@ class AttendanceController extends Controller
             ->first();
 
         if ($attendance) {
-            // 1. end_time が null の最新の休憩レコードを1件取得
+            // 1. break_end が null の最新の休憩レコードを1件取得
             $rest = Rest::where('attendance_id', $attendance->id)
-                ->whereNull('end_time')
+                ->whereNull('break_end')
                 ->latest()
                 ->first();
 
             if ($rest) {
                 // 2. 休憩終了時刻を保存
                 $rest->update([
-                    'end_time' => \Carbon\Carbon::now()->format('H:i:s'),
+                    'break_end' => Carbon::now()->format('H:i:s'),
                 ]);
 
                 // 3. 勤怠ステータスを「出勤中」に戻す
@@ -107,11 +111,11 @@ class AttendanceController extends Controller
         return redirect()->back();
     }
 
-    //退勤ボタン押下
+    /** 退勤ボタン押下 */
     public function workEnd(Request $request)
     {
         $userId = Auth::id();
-        $today = \Carbon\Carbon::today()->format('Y-m-d');
+        $today = Carbon::today()->format('Y-m-d');
 
         $attendance = Attendance::where('user_id', $userId)
             ->where('date', $today)
@@ -120,7 +124,7 @@ class AttendanceController extends Controller
         if ($attendance) {
             // 退勤時刻を保存し、ステータスを「4: 退勤済」に更新
             $attendance->update([
-                'check_out' => \Carbon\Carbon::now()->format('H:i:s'),
+                'check_out' => Carbon::now()->format('H:i:s'),
                 'status' => 4, // 4: 退勤済
             ]);
         }
@@ -128,12 +132,12 @@ class AttendanceController extends Controller
         return redirect()->back();
     }
 
-    //勤怠一覧表示
+    /** 勤怠一覧表示 */
     public function list(Request $request)
     {
         // クエリパラメータから年月を取得（なければ当月）
         $monthParam = $request->query('month', now()->format('Y-m'));
-        $date = \Carbon\Carbon::parse($monthParam)->startOfMonth();
+        $date = Carbon::parse($monthParam)->startOfMonth();
 
         // 1ヶ月分の全日付を生成
         $daysInMonth = $date->daysInMonth;
@@ -156,5 +160,64 @@ class AttendanceController extends Controller
             'prevMonth' => $date->copy()->subMonth()->format('Y-m'),
             'nextMonth' => $date->copy()->addMonth()->format('Y-m'),
         ]);
+    }
+
+    /** 勤怠詳細画面の表示 */
+    public function showDetail($date)
+    {
+        $user = Auth::user(); // 現在のログインユーザー
+        $carbonDate = Carbon::parse($date);
+
+        // Eloquentを使用して該当日付のレコードを取得
+        $attendance = Attendance::with('rests')
+            ->where('user_id', $user->id)
+            ->whereDate('date', $carbonDate)
+            ->first();
+
+        return view('attendance_detail', [
+            'attendance' => $attendance,
+            'user' => $user,
+            'date' => $date,
+            'formattedDate' => $carbonDate->isoFormat('YYYY年M月D日'),
+        ]);
+    }
+
+    /** 勤怠詳細の修正依頼 */
+    public function updateDetail(Request $request, $date)
+    {
+        $user = Auth::user();
+        $carbonDate = Carbon::parse($date);
+
+        // 元となる勤怠レコードを取得
+        $attendance = Attendance::where('user_id', $user->id)
+            ->whereDate('date', $carbonDate)
+            ->first();
+
+        DB::transaction(function () use ($request, $user, $carbonDate, $attendance) {
+
+            // 1. 勤怠修正申請の作成（マイグレーションのカラム名に厳密に合わせました）
+            $correctRequest = AttendanceCorrectRequest::create([
+                'attendance_id' => $attendance->id,
+                'user_id'       => $user->id,
+                'date'          => $carbonDate->format('Y-m-d'),
+                'check_in'      => $request->check_in,  // Blade側のnameをcheck_inにする想定
+                'check_out'     => $request->check_out, // Blade側のnameをcheck_outにする想定
+                'remarks'       => $request->remarks,   // noteではなくremarks
+                'status'        => 1, // 1:承認待ち
+            ]);
+
+            // 2. 休憩修正申請の作成
+            if ($request->break_start && $request->break_end) {
+                RestCorrectRequest::create([
+                    // マイグレーション通りのカラム名: attendance_correct_request_id
+                    'attendance_correct_request_id' => $correctRequest->id,
+                    'break_start' => $request->break_start,
+                    'break_end'   => $request->break_end,
+                ]);
+            }
+        });
+
+        return redirect()->route('attendance.list', ['month' => $carbonDate->format('Y-m')])
+            ->with('success', '修正申請を送信しました。承認をお待ちください。');
     }
 }

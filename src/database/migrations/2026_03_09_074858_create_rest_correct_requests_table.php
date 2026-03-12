@@ -17,8 +17,8 @@ return new class extends Migration
             $table->foreignId('attendance_correct_request_id')->constrained()->cascadeOnDelete();
 
             // 修正後の休憩開始・終了時間
-            $table->time('start_time');
-            $table->time('end_time');
+            $table->time('break_start');
+            $table->time('break_end');
 
             $table->timestamps();
         });

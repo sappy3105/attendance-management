@@ -40,22 +40,24 @@
                         {{-- 出勤時刻 --}}
                         <td>
                             @if ($attendance && $attendance->check_in)
-                                {{ \Carbon\Carbon::parse($attendance->check_in)->format('H:i') }}
+                                {{ $attendance->check_in->format('H:i') }}
                             @endif
                         </td>
 
                         {{-- 退勤時刻 --}}
                         <td>
                             @if ($attendance && $attendance->check_out)
-                                {{ \Carbon\Carbon::parse($attendance->check_out)->format('H:i') }}
+                                {{ $attendance->check_out->format('H:i') }}
                             @endif
                         </td>
                         <td>{{-- 休憩合計時間の計算処理をここに --}}</td>
                         <td>{{-- 勤務合計時間の計算処理をここに --}}</td>
                         <td>
-                            @if ($attendance)
-                                <a
-                                    href="{{ url('/attendance/detail/' . $attendance->id) }}"class="attendance-table__detail-link">詳細</a>
+                            @if ($day->isPast() || $day->isToday())
+                                <a href="{{ route('attendance.detail', ['date' => $day->format('Y-m-d')]) }}"
+                                    class="attendance-table__detail-link">
+                                    詳細
+                                </a>
                             @endif
                         </td>
                     </tr>

@@ -23,7 +23,7 @@
                 <nav class="header__nav">
                     <ul class="header__nav-list">
                         @auth
-                            <li><a href="" class="header__nav-link">勤怠</a></li>
+                            <li><a href="/attendance" class="header__nav-link">勤怠</a></li>
                             <li><a href="/attendance/list" class="header__nav-link">勤怠一覧</a></li>
                             <li><a href="" class="header__nav-link">申請</a></li>
                             <li>
