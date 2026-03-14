@@ -11,8 +11,8 @@ class RestCorrectRequest extends Model
 
     protected $fillable = [
         'attendance_correct_request_id',
-        'start_time',
-        'end_time',
+        'break_start',
+        'break_end',
     ];
 
     protected $casts = [

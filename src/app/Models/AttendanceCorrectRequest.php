@@ -24,4 +24,10 @@ class AttendanceCorrectRequest extends Model
         'check_in' => 'datetime',
         'check_out' => 'datetime',
     ];
+
+    public function restCorrectRequests()
+    {
+        // 第二引数は RestCorrectRequest テーブルにある外部キー名を指定します
+        return $this->hasMany(RestCorrectRequest::class, 'attendance_correct_request_id');
+    }
 }

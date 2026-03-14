@@ -30,4 +30,7 @@ Route::middleware('auth')->group(function () {
     // 勤怠詳細の更新（修正申請）
     Route::post('/attendance/{date}', [AttendanceController::class, 'updateDetail'])
         ->name('attendance.update');
+
+    // 申請一覧画面表示
+    Route::get('/stamp_correction_request/list',[AttendanceController::class, 'showRequestList'])->name('attendance.requests');
 });

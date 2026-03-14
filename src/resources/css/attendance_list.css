@@ -1,8 +1,7 @@
 .attendance-list{
-    max-width: 800px;
-    margin: 0 auto;
+    max-width: 900px;
+    margin: 60px auto;
     text-align: left;
-    margin-top: 60px;
 }
 
 .attendance-list__heading {
@@ -10,6 +9,7 @@
     padding-left: 15px;
     margin-bottom: 30px;
     font-size: 24px;
+    font-weight: bold;
 }
 
 .attendance-list__nav{
@@ -102,6 +102,7 @@
     text-decoration: none;
     color: #000;
     font-weight: bold;
+    cursor: pointer;
 }
 
 

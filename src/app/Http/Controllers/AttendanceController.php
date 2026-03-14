@@ -168,17 +168,43 @@ class AttendanceController extends Controller
         $user = Auth::user(); // 現在のログインユーザー
         $carbonDate = Carbon::parse($date);
 
-        // Eloquentを使用して該当日付のレコードを取得
-        $attendance = Attendance::with('rests')
-            ->where('user_id', $user->id)
+        // 1. 元の勤怠データを取得
+        $attendance = Attendance::where('user_id', $user->id)
             ->whereDate('date', $carbonDate)
             ->first();
 
+        // 2. この日の「承認待ち」の修正申請があるか確認
+        $pendingRequest = null;
+        if ($attendance) {
+            $pendingRequest = AttendanceCorrectRequest::where('attendance_id', $attendance->id)
+                ->where('status', 1) // 1:承認待ち
+                ->with('restCorrectRequests') // 休憩の申請データも一緒に取得
+                ->first();
+        }
+
+        // 3. 画面に表示する値を決定（申請中なら申請データ、なければ元のデータ）
+        $displayData = [
+            'check_in'  => $pendingRequest ? $pendingRequest->check_in : ($attendance ? $attendance->check_in : null),
+            'check_out' => $pendingRequest ? $pendingRequest->check_out : ($attendance ? $attendance->check_out : null),
+            'remarks'   => $pendingRequest ? $pendingRequest->remarks : ($attendance ? $attendance->remarks : ''),
+        ];
+
+        // 4. 休憩データ
+        if ($pendingRequest) {
+            // 申請中の休憩データをそのまま取得（$castsによって各要素は既にCarbonになっています）
+            $rests = $pendingRequest->restCorrectRequests;
+        } else {
+            // 元の休憩データ
+            $rests = $attendance ? $attendance->rests : collect();
+        }
+
         return view('attendance_detail', [
-            'attendance' => $attendance,
             'user' => $user,
+            'attendance' => $attendance,
             'date' => $date,
-            'formattedDate' => $carbonDate->isoFormat('YYYY年M月D日'),
+            'displayData' => $displayData,
+            'rests' => $rests,
+            'isPending' => !is_null($pendingRequest),
         ]);
     }
 
@@ -207,17 +233,53 @@ class AttendanceController extends Controller
             ]);
 
             // 2. 休憩修正申請の作成
-            if ($request->break_start && $request->break_end) {
-                RestCorrectRequest::create([
-                    // マイグレーション通りのカラム名: attendance_correct_request_id
-                    'attendance_correct_request_id' => $correctRequest->id,
-                    'break_start' => $request->break_start,
-                    'break_end'   => $request->break_end,
-                ]);
+            if ($request->has('break_start')) {
+                foreach ($request->break_start as $index => $start) {
+                    $end = $request->break_end[$index] ?? null;
+
+                    // 開始・終了の両方が入力されている場合のみ保存
+                    if (!is_null($start) && $start !== '' && !is_null($end) && $end !== '') {
+                        RestCorrectRequest::create([
+                            'attendance_correct_request_id' => $correctRequest->id,
+                            'break_start' => $start,
+                            'break_end'   => $end,
+                        ]);
+                    }
+                }
             }
         });
 
-        return redirect()->route('attendance.list', ['month' => $carbonDate->format('Y-m')])
-            ->with('success', '修正申請を送信しました。承認をお待ちください。');
+        return redirect()->route('attendance.detail', ['date' => $date]);
+    }
+
+    /** 申請一覧画面の表示 */
+    public function showRequestList(Request $request)
+    {
+        $user = Auth::user();
+
+        // クエリパラメータから表示モードを取得（デフォルトは承認待ち：pending）
+        $statusMode = $request->query('status', 'pending');
+
+        if ($statusMode === 'approved') {
+            // 承認済み（status: 2）のデータを取得
+            $status = 'approved';
+            $requests = AttendanceCorrectRequest::where('user_id', $user->id)
+                ->where('status', 2)
+                ->orderBy('created_at', 'desc')
+                ->get();
+        } else {
+            // 承認待ち（status: 1）のデータを取得
+            $status = 'pending';
+            $requests = AttendanceCorrectRequest::where('user_id', $user->id)
+                ->where('status', 1)
+                ->orderBy('created_at', 'desc')
+                ->get();
+        }
+
+        return view('attendance_request_list', [
+            'user' => $user,
+            'requests' => $requests,
+            'status' => $status,
+        ]);
     }
 }

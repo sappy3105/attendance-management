@@ -4,3 +4,5 @@
 @import './auth/register.css';
 @import './attendance.css';
 @import './attendance_list.css';
+@import './attendance_detail.css';
+@import './attendance_request_list.css';

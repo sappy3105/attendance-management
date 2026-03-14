@@ -1,0 +1,87 @@
+.request-list {
+    max-width: 900px;
+    margin: 60px auto;
+}
+
+.request-list__heading {
+    border-left: 5px solid #000;
+    padding-left: 15px;
+    margin-bottom: 30px;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+/* タブデザイン */
+.request-list__tabs {
+    display: flex;
+    gap: 80px;
+    border-bottom: 2px solid #606060;
+    margin-bottom: 30px;
+    padding-left: 40px;
+}
+
+.request-list__tab {
+    text-decoration: none;
+    color: #606060;
+    font-size: 16px;
+
+    padding-bottom: 10px;
+    position: relative;
+}
+
+.request-list__tab.is-active {
+    color: #000;
+    font-weight: bold;
+}
+
+/* 選択しているタブの下線 */
+/* .request-list__tab.is-active::after {
+    content: "";
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: #000;
+} */
+
+/* テーブルデザイン */
+.request-list__table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    letter-spacing: 2px;
+}
+
+.request-list__row {
+    border-bottom: 1px solid #eee;
+}
+
+.request-list__row:first-of-type {
+    border-bottom: 3px solid #eee;
+}
+
+.request-list__label {
+    text-align: left;
+    padding: 20px;
+    /* background-color: #f8f8f8; */
+    color: #606060;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.request-list__value {
+    padding: 20px;
+    font-size: 15px;
+    font-weight: bold;
+    color: #606060;
+}
+
+.request-list__link {
+    color: #000;
+    font-weight: bold;
+    text-decoration: none;
+    cursor: pointer;
+}

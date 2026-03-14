@@ -42,11 +42,42 @@
     background-color: #fff;
 }
 
-.attendance-detail__user-name,
-.attendance-detail__date-text {
+.attendance-detail__user-name {
+    padding: 30px;
     font-size: 18px;
     font-weight: bold;
     letter-spacing: 1px;
+}
+
+.attendance-detail__date-container {
+    display: flex;
+    align-items: center;
+}
+
+.attendance-detail__date-year {
+    width: 130px;
+    /* .attendance-detail__input と同じ幅 */
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+    letter-spacing: 2px;
+}
+
+.attendance-detail__date-separator {
+    width: 80px;
+    /* ここの数値で「月日」の開始位置を微調整してください */
+    display: inline-block;
+}
+
+.attendance-detail__date-month {
+    font-size: 18px;
+    font-weight: bold;
+    letter-spacing: 2px;
+}
+
+input[type="time"]::-webkit-calendar-picker-indicator {
+    display: none;
+    -webkit-appearance: none;
 }
 
 /* 入力エリアのスタイル */
@@ -57,12 +88,14 @@
 }
 
 .attendance-detail__input {
-    padding: 8px 12px;
+    padding: 5px 10px;
     border: 1px solid #ddd;
     border-radius: 4px;
-    font-size: 16px;
+    font-size: 18px;
     font-family: inherit;
     color: #333;
+    font-weight: bold;
+    letter-spacing: 2px;
     width: 130px;
     text-align: center;
 }
@@ -76,29 +109,68 @@
     padding: 12px;
     border: 1px solid #ddd;
     border-radius: 4px;
-    font-size: 16px;
+    font-size: 18px;
     resize: none;
     box-sizing: border-box;
 }
 
-/* ボタンエリア */
-.attendance-detail__actions {
-    margin-top: 40px;
+/* テキスト表示時のスタイル */
+.attendance-detail__text-time {
+    display: inline-block;
+    width: 130px;
+    /* inputと同じ幅 */
     text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+    letter-spacing: 2px;
+    padding: 5px;
 }
 
-.attendance-detail__submit-btn {
+.attendance-detail__text-remarks {
+    font-size: 18px;
+    font-weight: bold;
+    /* 他のテキストと太さを合わせる場合 */
+    line-height: 1.6;
+    white-space: pre-wrap;
+    text-align: left;
+    /* 明示的に左寄せにする */
+
+    /* 入力モード時のtextareaやinputの開始位置と揃えるための調整 */
+    padding: 10px 0 10px 30px;
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+
+/* ボタンエリア */
+.attendance-detail__actions {
+    margin-top: 30px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.attendance-detail__submit-button {
     background-color: #000;
     color: #fff;
     border: none;
-    padding: 12px 60px;
+    padding: 10px 40px;
     font-size: 18px;
-    font-weight: bold;
+    letter-spacing: 3px;
     border-radius: 5px;
     cursor: pointer;
     transition: opacity 0.2s;
 }
 
-.attendance-detail__submit-btn:hover {
+.attendance-detail__submit-button:hover {
     opacity: 0.8;
+}
+
+/* 承認待ちメッセージ */
+.attendance-detail__pending-msg {
+    color: #ff0000;
+    font-size: 16px;
+    font-weight: bold;
+    letter-spacing: 2px;
+    margin-top: 10px;
 }
