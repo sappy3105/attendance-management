@@ -18,10 +18,13 @@
 
 .main {
     width: 100%;
-    background-color: rgba(222, 219, 219, 0.279);
-    min-height: calc(100vh - 60px);
+    background-color: #f7f7f7;
     min-height: calc(100vh - 60px);
     display: flow-root;
+}
+
+.main--white {
+    background-color: #fff;
 }
 
 .main__inner {

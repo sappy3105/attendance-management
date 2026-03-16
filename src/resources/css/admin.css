@@ -1,0 +1,17 @@
+/* 日付選択のinputをカレンダー形式で使いやすく調整 */
+.hidden-month-input[type="date"] {
+    position: absolute;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    pointer-events: auto;
+    /* クリックできるように修正 */
+}
+
+/* テーブル内の「詳細」文字を要件通り太字に */
+.attendance-table__detail-link {
+    color: #000;
+    font-weight: bold;
+    text-decoration: none;
+}

@@ -1,7 +1,13 @@
 <?php
 
 use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\AdminAttendanceController;
 use Illuminate\Support\Facades\Route;
+
+// 管理者用ログイン画面
+Route::get('/admin/login', function () {
+    return view('admin.auth.login');
+})->name('admin.login');
 
 // ログイン後のみアクセス可能なグループ
 Route::middleware('auth')->group(function () {
@@ -32,5 +38,20 @@ Route::middleware('auth')->group(function () {
         ->name('attendance.update');
 
     // 申請一覧画面表示
-    Route::get('/stamp_correction_request/list',[AttendanceController::class, 'showRequestList'])->name('attendance.requests');
+    Route::get('/stamp_correction_request/list', [AttendanceController::class, 'showRequestList'])->name('attendance.requests');
+
+    // 管理者用
+    Route::prefix('admin')->group(function () {
+        // 勤怠一覧画面表示
+        Route::get('/attendance/list', [AdminAttendanceController::class, 'list'])->name('admin.attendance.list');
+
+        // 勤怠詳細画面表示
+        Route::get('/attendance/{id}', [AdminAttendanceController::class, 'showDetail'])->name('admin.attendance.detail');
+
+        // 勤怠修正
+        Route::post('/attendance/update/{id}', [AdminAttendanceController::class, 'update'])->name('admin.attendance.update');
+    });
+
+
+
 });

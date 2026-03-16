@@ -1,4 +1,4 @@
-@extends('layouts.default')
+@extends('layouts.default', ['mainClass' => 'main--white'])
 
 @section('content')
     <div class="verify__container">

@@ -40,6 +40,10 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+        'admin' => [ // 追加
+            'driver' => 'session',
+            'provider' => 'users',
+        ],
     ],
 
     /*

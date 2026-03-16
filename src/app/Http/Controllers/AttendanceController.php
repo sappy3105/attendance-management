@@ -276,6 +276,14 @@ class AttendanceController extends Controller
                 ->get();
         }
 
+        // 管理者の場合
+        if ($user->role === '2') {
+            // 管理者用のデータを取得
+            // $requests = ...
+            return view('admin.stamp_correction_request_list'); // 管理者用のViewを返す
+        }
+
+        // 一般ユーザーの場合
         return view('attendance_request_list', [
             'user' => $user,
             'requests' => $requests,

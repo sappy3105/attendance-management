@@ -1,8 +1,8 @@
-@extends('layouts.default', ['mainClass' => 'main--white'])
+@extends('admin.layouts.default', ['mainClass' => 'main--white'])
 
 @section('content')
     <div class="login-form__content"> {{-- 共通のスタイルを適用 --}}
-        <h1 class="login-form__heading">ログイン</ｄ>
+        <h2 class="login-form__heading">管理者ログイン</h2>
 
         <form action="{{ route('login') }}" method="post" novalidate>
             @csrf
@@ -27,11 +27,7 @@
                 </div>
             </div>
 
-            <button class="login-form__button-submit" type="submit">ログインする</button>
+            <button class="login-form__button-submit" type="submit">管理者ログインする</button>
         </form>
-
-        <div class="register__link">
-            <a class="register__button" href="/register">会員登録はこちら</a>
-        </div>
     </div>
 @endsection
