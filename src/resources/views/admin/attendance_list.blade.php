@@ -39,8 +39,8 @@
                         <td>{{ $attendance->user->name }}</td>
                         <td>{{ $attendance->check_in ? $attendance->check_in->format('H:i') : '' }}</td>
                         <td>{{ $attendance->check_out ? $attendance->check_out->format('H:i') : '' }}</td>
-                        <td>{{-- 休憩合計 --}}</td>
-                        <td>{{-- 勤務合計 --}}</td>
+                        <td>{{ $attendance->getTotalRestTime() }}</td>{{-- 休憩合計 --}}
+                        <td>{{ $attendance->getTotalWorkTime() }}</td>{{-- 勤務合計 --}}
                         <td>
                             {{-- 要件：詳細画面へ遷移 --}}
                             <a href="{{ route('admin.attendance.detail', ['id' => $attendance->id]) }}"

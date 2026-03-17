@@ -27,10 +27,10 @@ class LoginResponse implements LoginResponseContract
 
         // 管理者の場合←いったんの設定。認証画面できあがったら上記の記述に書き換える
         if ($user->role == '2') {
-            return redirect()->intended('/admin/attendance/list');
+            return redirect()->route('admin.attendance.list');
         }
 
         // 一般ユーザーの場合（メール認証なしで直接リダイレクト）
-        return redirect()->intended('/attendance');
+        return redirect()->route('attendance.index');
     }
 }

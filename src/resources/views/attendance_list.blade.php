@@ -37,21 +37,31 @@
                     @php $attendance = $attendances->get($day->format('Y-m-d')); @endphp
                     <tr>
                         <td>{{ $day->isoFormat('MM/DD(ddd)') }}</td>
+
                         {{-- 出勤時刻 --}}
                         <td>
                             @if ($attendance && $attendance->check_in)
-                                {{ $attendance->check_in->format('H:i') }}
+                                {{ \Carbon\Carbon::parse($attendance->check_in)->format('H:i') }}
                             @endif
                         </td>
 
                         {{-- 退勤時刻 --}}
                         <td>
                             @if ($attendance && $attendance->check_out)
-                                {{ $attendance->check_out->format('H:i') }}
+                                {{ \Carbon\Carbon::parse($attendance->check_out)->format('H:i') }}
                             @endif
                         </td>
-                        <td>{{-- 休憩合計時間の計算処理をここに --}}</td>
-                        <td>{{-- 勤務合計時間の計算処理をここに --}}</td>
+
+                        {{-- 休憩合計時間 --}}
+                        <td>
+                            {{ $attendance ? $attendance->getTotalRestTime() : '' }}
+                        </td>
+
+                        {{-- 勤務合計時間 --}}
+                        <td>
+                            {{ $attendance ? $attendance->getTotalWorkTime() : '' }}
+                        </td>
+                        
                         <td>
                             @if ($day->isPast() || $day->isToday())
                                 <a href="{{ route('attendance.detail', ['date' => $day->format('Y-m-d')]) }}"

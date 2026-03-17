@@ -45,10 +45,10 @@
                         @else
                             <div class="attendance-detail__time-group">
                                 <input type="time" name="check_in" class="attendance-detail__input"
-                                    value="{{ $displayData['check_in'] ? $displayData['check_in']->format('H:i') : '' }}">
+                                    value="{{ $displayData['check_in'] ? \Carbon\Carbon::parse($displayData['check_in'])->format('H:i') : '' }}">
                                 <span class="attendance-detail__separator">〜</span>
                                 <input type="time" name="check_out" class="attendance-detail__input"
-                                    value="{{ $displayData['check_out'] ? $displayData['check_out']->format('H:i') : '' }}">
+                                    value="{{ $displayData['check_out'] ? \Carbon\Carbon::parse($displayData['check_out'])->format('H:i') : '' }}">
                             </div>
                         @endif
                     </td>
@@ -81,10 +81,10 @@
                             @else
                                 <div class="attendance-detail__time-group">
                                     <input type="time" name="break_start[]" class="attendance-detail__input"
-                                        value="{{ $rest && $rest->break_start ? $rest->break_start->format('H:i') : '' }}">
+                                        value="{{ $rest && $rest->break_start ? \Carbon\Carbon::parse($rest->break_start)->format('H:i') : '' }}">
                                     <span class="attendance-detail__separator">〜</span>
                                     <input type="time" name="break_end[]" class="attendance-detail__input"
-                                        value="{{ $rest && $rest->break_end ? $rest->break_end->format('H:i') : '' }}">
+                                        value="{{ $rest && $rest->break_end ? \Carbon\Carbon::parse($rest->break_end)->format('H:i') : '' }}">
                                 </div>
                             @endif
                         </td>

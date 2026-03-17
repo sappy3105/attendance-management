@@ -7,29 +7,16 @@ use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\Auth;
 
 use App\Http\Requests\LoginRequest as MyLoginRequest;
-use App\Http\Requests\RegisterRequest as MyRegisterRequest;
 use Laravel\Fortify\Http\Requests\LoginRequest as FortifyLoginRequest;
-use Laravel\Fortify\Http\Requests\RegisterRequest as FortifyRegisterRequest;
 
 use Laravel\Fortify\Fortify;
-use Laravel\Fortify\Contracts\LogoutResponse;
 use App\Http\Responses\LoginResponse as MyLoginResponse;
-use Laravel\Fortify\Contracts\LoginResponse as FortifyLoginResponse;;
+use Laravel\Fortify\Contracts\LoginResponse as FortifyLoginResponse;
+use Laravel\Fortify\Contracts\LogoutResponse as LogoutResponseContract;
 
-use Laravel\Fortify\Contracts\RegisterResponse as RegisterResponseContract;
-use Laravel\Fortify\Contracts\VerifyEmailResponse as VerifyEmailResponseContract;
-
-use App\Http\Responses\RegisterResponse;
-use App\Http\Responses\VerifyEmailResponse;
-
-use App\Actions\Fortify\ResetUserPassword;
-use App\Actions\Fortify\UpdateUserPassword;
-use App\Actions\Fortify\UpdateUserProfileInformation;
-use Illuminate\Support\Str;
-use Laravel\Fortify\Actions\RedirectIfTwoFactorAuthenticatable;
+use App\Http\Responses\LogoutResponse;
 
 class FortifyServiceProvider extends ServiceProvider
 {
@@ -57,15 +44,17 @@ class FortifyServiceProvider extends ServiceProvider
         // $this->app->singleton(VerifyEmailResponseContract::class, VerifyEmailResponse::class);
 
         // ログアウト後のリダイレクト先
-        $this->app->instance(LogoutResponse::class, new class implements LogoutResponse {
-            public function toResponse($request)
-            {
-                if (request()->is('admin/*') || request()->is('admin')) {
-                    return redirect('/admin/login');
-                }
-                return redirect('/login');
-            }
-        });
+        // $this->app->instance(LogoutResponse::class, new class implements LogoutResponse {
+        //     public function toResponse($request)
+        //     {
+        //         if (request()->is('admin/*') || request()->is('admin')) {
+        //             return redirect('/admin/login');
+        //         }
+        //         return redirect('/login');
+        //     }
+        // });
+
+        $this->app->singleton(LogoutResponseContract::class, LogoutResponse::class);
     }
 
     /**

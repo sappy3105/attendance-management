@@ -147,11 +147,14 @@ class AttendanceController extends Controller
         }
 
         // DBからログインユーザーの該当月のデータを取得
-        $attendances = Attendance::where('user_id', auth()->id())
+        $attendances = Attendance::with('rests')
+            ->where('user_id', Auth::id())
             ->whereYear('date', $date->year)
             ->whereMonth('date', $date->month)
             ->get()
-            ->keyBy('date'); // 日付をキーにして検索しやすくする
+            ->keyBy(function ($item) {
+                return $item->date->format('Y-m-d');
+            });
 
         return view('attendance_list', [
             'calendar' => $calendar,
