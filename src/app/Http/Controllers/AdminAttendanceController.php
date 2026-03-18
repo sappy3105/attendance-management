@@ -5,10 +5,12 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Attendance;
+use App\Models\User;
 use Carbon\Carbon;
 
 class AdminAttendanceController extends Controller
 {
+    // 勤怠一覧画面（管理者）
     public function list(Request $request)
     {
         // クエリパラメータから日付を取得、なければ今日の日付
@@ -33,6 +35,7 @@ class AdminAttendanceController extends Controller
         ]);
     }
 
+    // 勤怠詳細画面（管理者）
     public function showDetail($id)
     {
         // IDから勤怠データを取得（スタッフ情報も一緒に）
@@ -52,6 +55,54 @@ class AdminAttendanceController extends Controller
                 'check_out' => $attendance->check_out,
                 'remarks' => $attendance->remarks,
             ],
+        ]);
+    }
+
+    // スタッフ一覧画面（管理者）
+    public function staffList()
+    {
+        // roleが1（一般スタッフ）のユーザーのみ取得
+        $users = User::where('role', 1)->get();
+
+        return view('admin.staff_list', compact('users'));
+    }
+
+    // スタッフ別勤怠一覧画面
+    public function staffAttendance(Request $request, $id)
+    {
+        $user = User::findOrFail($id);
+
+        // 表示月の判定（クエリパラメータ month がなければ今月）
+        $monthStr = $request->query('month');
+        $currentMonth = $monthStr ? Carbon::parse($monthStr)->startOfMonth() : Carbon::today()->startOfMonth();
+
+        // 前月・翌月の計算
+        $prevMonth = $currentMonth->copy()->subMonth()->format('Y-m');
+        $nextMonth = $currentMonth->copy()->addMonth()->format('Y-m');
+
+        // 指定スタッフの対象月の勤怠データを取得
+        $attendances = Attendance::with('rests')
+            ->where('user_id', $id)
+            ->whereBetween('date', [$currentMonth->copy()->startOfMonth(), $currentMonth->copy()->endOfMonth()])
+            ->get()
+            ->keyBy(function ($item) {
+                return $item->date->format('Y-m-d');
+            });
+
+        // カレンダー作成（1日〜月末まで）
+        $calendar = [];
+        $daysInMonth = $currentMonth->daysInMonth;
+        for ($i = 0; $i < $daysInMonth; $i++) {
+            $calendar[] = $currentMonth->copy()->addDays($i);
+        }
+
+        return view('admin.staff_attendance_list', [
+            'user' => $user,
+            'calendar' => $calendar,
+            'attendances' => $attendances,
+            'currentMonth' => $currentMonth,
+            'prevMonth' => $prevMonth,
+            'nextMonth' => $nextMonth,
         ]);
     }
 }

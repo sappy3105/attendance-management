@@ -4,7 +4,7 @@
     <div class="attendance-detail">
         <h1 class="attendance-detail__heading">勤怠詳細</h1>
 
-        <form action="" method="POST" class="attendance-detail__form">
+        <form action="{{ route('admin.attendance.update', $attendance->id) }}" method="POST" class="attendance-detail__form">
             @csrf
             <table class="attendance-detail__table">
                 <tr class="attendance-detail__row">

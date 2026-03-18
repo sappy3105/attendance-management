@@ -3,30 +3,22 @@
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\AdminAttendanceController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
+use Laravel\Fortify\Http\Controllers\AuthenticatedSessionController;
 
-// トップページ「/」
+// トップページ（ログイン状態により分岐）
 Route::get('/', function () {
-    // ログインしていなければ、自動的にスタッフ用ログイン画面を表示（またはリダイレクト）
-    if (!Auth::check()) {
-        return view('auth.login');
-        // または return redirect()->route('login');
-    }
-
-    $user = Auth::user();
-
-    // 管理者の場合
-    if ($user->role == '2') {
-        return redirect()->route('admin.attendance.list');
-    }
-
-    // 一般ユーザーの場合
-    return redirect()->route('attendance.index');
+    if (!Auth::check()) return view('auth.login');
+    return Auth::user()->role == 2
+        ? redirect()->route('admin.attendance.list')
+        : redirect()->route('attendance.index');
 });
 
 // 管理者用ログイン画面
-Route::get('/admin/login', function () {
-    return view('admin.auth.login');
-})->name('admin.login');
+Route::get('/admin/login', fn() => view('admin.auth.login'))->name('admin.login');
+
+// 管理者ログインの「実行処理」
+Route::post('/admin/login', [AuthenticatedSessionController::class, 'store']);
 
 // ログイン後のみアクセス可能なグループ
 Route::middleware('auth')->group(function () {
@@ -69,8 +61,12 @@ Route::middleware('auth')->group(function () {
 
         // 勤怠修正
         Route::post('/attendance/update/{id}', [AdminAttendanceController::class, 'update'])->name('admin.attendance.update');
+
+        // スタッフ一覧表示
+        Route::get('/staff/list', [AdminAttendanceController::class, 'staffList'])->name('admin.staff.list');
+
+        // スタッフ別勤怠一覧表示
+        Route::get('/attendance/staff/{id}', [AdminAttendanceController::class, 'staffAttendance'])->name('admin.staff.attendance');
+
     });
-
-
-
 });

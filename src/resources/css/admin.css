@@ -15,3 +15,76 @@
     font-weight: bold;
     text-decoration: none;
 }
+
+/* スタッフ一覧専用スタイル */
+.staff-list {
+    max-width: 900px;
+    margin: 80px auto;
+}
+
+.staff-list__heading {
+    border-left: 5px solid #000;
+    padding-left: 15px;
+    margin-bottom: 60px;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.staff-list__table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+    background-color: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    letter-spacing: 2px;
+}
+
+/* 名前 */
+.staff-list__label:nth-child(1),
+.staff-list__value:nth-child(1) {
+    width: 25%;
+}
+
+/* メール */
+.staff-list__label:nth-child(2),
+.staff-list__value:nth-child(2) {
+    width: 50%;
+}
+
+/* 月次勤怠 */
+.staff-list__label:nth-child(3),
+.staff-list__value:nth-child(3) {
+    width: 25%;
+}
+
+.staff-list__row {
+    border-bottom: 1px solid #eee;
+}
+
+.staff-list__thead .staff-list__row:first-of-type {
+    border-bottom: 3px solid #eee;
+}
+
+.staff-list__label {
+    padding: 25px 0;
+    color: #606060;
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.staff-list__value {
+    text-align: center;
+    padding: 25px 0;
+    font-size: 15px;
+    font-weight: bold;
+    color: #606060;
+}
+
+.staff-list__link {
+    color: #000;
+    font-weight: bold;
+    text-decoration: none;
+    cursor: pointer;
+}
