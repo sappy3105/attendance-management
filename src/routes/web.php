@@ -4,6 +4,25 @@ use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\AdminAttendanceController;
 use Illuminate\Support\Facades\Route;
 
+// トップページ「/」
+Route::get('/', function () {
+    // ログインしていなければ、自動的にスタッフ用ログイン画面を表示（またはリダイレクト）
+    if (!Auth::check()) {
+        return view('auth.login');
+        // または return redirect()->route('login');
+    }
+
+    $user = Auth::user();
+
+    // 管理者の場合
+    if ($user->role == '2') {
+        return redirect()->route('admin.attendance.list');
+    }
+
+    // 一般ユーザーの場合
+    return redirect()->route('attendance.index');
+});
+
 // 管理者用ログイン画面
 Route::get('/admin/login', function () {
     return view('admin.auth.login');

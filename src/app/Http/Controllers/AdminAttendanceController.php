@@ -22,7 +22,7 @@ class AdminAttendanceController extends Controller
         // 指定した日の全ユーザーの勤怠データを取得
         // Eagerロードでユーザー情報も一緒に取得します
         $attendances = Attendance::with(['user', 'rests'])
-            ->whereDate('date', $currentDate->format('Y-m-d'))
+            ->whereDate('date', $currentDate)
             ->get();
 
         return view('admin.attendance_list', [

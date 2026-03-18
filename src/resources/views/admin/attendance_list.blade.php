@@ -37,8 +37,10 @@
                 @foreach ($attendances as $attendance)
                     <tr>
                         <td>{{ $attendance->user->name }}</td>
-                        <td>{{ $attendance->check_in ? $attendance->check_in->format('H:i') : '' }}</td>
-                        <td>{{ $attendance->check_out ? $attendance->check_out->format('H:i') : '' }}</td>
+                        <td>{{ $attendance->check_in ? \Carbon\Carbon::parse($attendance->check_in)->format('H:i') : '' }}
+                        </td>
+                        <td>{{ $attendance->check_out ? \Carbon\Carbon::parse($attendance->check_out)->format('H:i') : '' }}
+                        </td>
                         <td>{{ $attendance->getTotalRestTime() }}</td>{{-- 休憩合計 --}}
                         <td>{{ $attendance->getTotalWorkTime() }}</td>{{-- 勤務合計 --}}
                         <td>
