@@ -21,12 +21,12 @@ class AttendanceSeeder extends Seeder
         $staffUsers = User::where('role', '1')->get();
 
         // 2. 作成したい期間（今月の1日〜末日）を設定
-        $startOfMonth = Carbon::now()->startOfMonth();
-        $endOfMonth = Carbon::now()->endOfMonth();
+        $endDate = Carbon::yesterday(); // 昨日に設定（未来を含めない）
+        $startDate = $endDate->copy()->subDays(30); // 30日前から開始
 
         foreach ($staffUsers as $user) {
             // 各ユーザーごとに1日ずつループ
-            for ($date = $startOfMonth->copy(); $date <= $endOfMonth; $date->addDay()) {
+            for ($date = $startDate->copy(); $date <= $endDate; $date->addDay()) {
 
                 // 土日はデータを作らない場合は以下を有効化（任意）
                 if ($date->isWeekend()) continue;
@@ -41,6 +41,7 @@ class AttendanceSeeder extends Seeder
                         'check_in'  => '09:00:00',
                         'check_out' => '18:00:00',
                         'status'    => 4, //退勤済み
+                        'remarks'   => '通常の勤務',
                     ]
                 );
 
