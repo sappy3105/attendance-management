@@ -38,6 +38,7 @@
     border-radius: 12px;
     overflow: hidden;
     letter-spacing: 2px;
+    text-indent: 2px;
 }
 
 /* 名前 */
@@ -94,10 +95,10 @@
         /* テキスト要素をボタンと同じ振る舞いに */
     background-color: #606060;
     color: #fff;
-    border: none;
     padding: 10px 20px;
     font-size: 18px;
     letter-spacing: 3px;
+    text-indent: 3px;
     border-radius: 5px;
     text-align: center;
     box-sizing: border-box;

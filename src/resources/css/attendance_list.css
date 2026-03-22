@@ -27,6 +27,7 @@
     color: #6c6b6b;
     font-weight: bold;
     letter-spacing: 2px;
+    text-indent: 2px;
     text-decoration: none;
 }
 
@@ -70,6 +71,7 @@
     border-radius: 10px;
     overflow: hidden;
     letter-spacing: 2px;
+    text-indent: 2px;
 }
 
 .attendance-table th,

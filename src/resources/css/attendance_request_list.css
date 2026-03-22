@@ -53,6 +53,7 @@
     border-radius: 8px;
     overflow: hidden;
     letter-spacing: 2px;
+    text-indent: 2px;
 }
 
 .request-list__row {
