@@ -62,11 +62,22 @@ Route::middleware('auth')->group(function () {
         // 勤怠修正
         Route::post('/attendance/update/{id}', [AdminAttendanceController::class, 'update'])->name('admin.attendance.update');
 
+        // 申請一覧（管理者用：全ユーザーの申請が見れる）
+        Route::get('/stamp_correction_request/list', [AdminAttendanceController::class, 'showRequestList'])->name('admin.attendance.requests');
+
         // スタッフ一覧表示
         Route::get('/staff/list', [AdminAttendanceController::class, 'staffList'])->name('admin.staff.list');
 
         // スタッフ別勤怠一覧表示
         Route::get('/attendance/staff/{id}', [AdminAttendanceController::class, 'staffAttendance'])->name('admin.staff.attendance');
+
+        // 修正申請承認画面の表示
+        Route::get('/stamp_correction_request/approve/{attendance_correct_request_id}', [AdminAttendanceController::class, 'showApprove'])
+            ->name('admin.attendance.approve.show');
+
+        // 承認処理
+        Route::post('/stamp_correction_request/approve/{attendance_correct_request_id}', [AdminAttendanceController::class, 'approve'])
+            ->name('admin.attendance.approve');
 
     });
 });

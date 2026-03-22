@@ -25,7 +25,7 @@
                         @auth
                             <li><a href="/admin/attendance/list" class="header__nav-link">勤怠一覧</a></li>
                             <li><a href="/admin/staff/list" class="header__nav-link">スタッフ一覧</a></li>
-                            <li><a href="/stamp_correction_request/list" class="header__nav-link">申請一覧</a></li>
+                            <li><a href="{{ route('admin.attendance.requests') }}" class="header__nav-link">申請一覧</a></li>
                             <li>
                                 {{-- ログインしている時 --}}
                                 <form action="/logout" method="POST">

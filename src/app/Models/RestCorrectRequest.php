@@ -19,4 +19,9 @@ class RestCorrectRequest extends Model
         'break_start' => 'datetime',
         'break_end'   => 'datetime',
     ];
+
+    public function attendanceCorrectRequest()
+    {
+        return $this->belongsTo(AttendanceCorrectRequest::class, 'attendance_correct_request_id');
+    }
 }

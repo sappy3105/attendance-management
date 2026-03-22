@@ -19,11 +19,11 @@
                         <div class="attendance-detail__date-container">
                             {{-- 年と月日を分けて配置 --}}
                             <span class="attendance-detail__date-year">
-                                {{ $attendance ? $attendance->date->format('Y年') : now()->format('Y年') }}
+                                {{ $attendance ? \Carbon\Carbon::parse($attendance->date)->format('Y年') : now()->format('Y年') }}
                             </span>
                             <span class="attendance-detail__date-separator"></span> {{-- 空白を作るための要素 --}}
                             <span class="attendance-detail__date-month">
-                                {{ $attendance ? $attendance->date->isoFormat('M月D日') : now()->isoFormat('M月D日') }}
+                                {{ $attendance ? \Carbon\Carbon::parse($attendance->date)->isoFormat('M月D日') : now()->isoFormat('M月D日') }}
                             </span>
                         </div>
                     </td>
@@ -35,20 +35,20 @@
                             {{-- 申請中の時はテキスト表示 --}}
                             <div class="attendance-detail__time-group">
                                 <span class="attendance-detail__text-time">
-                                    {{ $displayData['check_in'] ? $displayData['check_in']->format('H:i') : '' }}
+                                    {{ $displayData['check_in'] ? \Carbon\Carbon::parse($displayData['check_in'])->format('H:i') : '' }}
                                 </span>
                                 <span class="attendance-detail__separator">〜</span>
                                 <span class="attendance-detail__text-time">
-                                    {{ $displayData['check_out'] ? $displayData['check_out']->format('H:i') : '' }}
+                                    {{ $displayData['check_out'] ? \Carbon\Carbon::parse($displayData['check_out'])->format('H:i') : '' }}
                                 </span>
                             </div>
                         @else
                             <div class="attendance-detail__time-group">
                                 <input type="time" name="check_in" class="attendance-detail__input"
-                                    value="{{ $displayData['check_in'] ? $displayData['check_in']->format('H:i') : '' }}">
+                                    value="{{ $displayData['check_in'] ? \Carbon\Carbon::parse($displayData['check_in'])->format('H:i') : '' }}">
                                 <span class="attendance-detail__separator">〜</span>
                                 <input type="time" name="check_out" class="attendance-detail__input"
-                                    value="{{ $displayData['check_out'] ? $displayData['check_out']->format('H:i') : '' }}">
+                                    value="{{ $displayData['check_out'] ? \Carbon\Carbon::parse($displayData['check_out'])->format('H:i') : '' }}">
                             </div>
                         @endif
                     </td>
@@ -71,20 +71,20 @@
                             @if ($isPending)
                                 <div class="attendance-detail__time-group">
                                     <span class="attendance-detail__text-time">
-                                        {{ $rest && $rest->break_start ? $rest->break_start->format('H:i') : '' }}
+                                        {{ $rest && $rest->break_start ? \Carbon\Carbon::parse($rest->break_start)->format('H:i') : '' }}
                                     </span>
                                     <span class="attendance-detail__separator">〜</span>
                                     <span class="attendance-detail__text-time">
-                                        {{ $rest && $rest->break_end ? $rest->break_end->format('H:i') : '' }}
+                                        {{ $rest && $rest->break_end ? \Carbon\Carbon::parse($rest->break_end)->format('H:i') : '' }}
                                     </span>
                                 </div>
                             @else
                                 <div class="attendance-detail__time-group">
                                     <input type="time" name="break_start[]" class="attendance-detail__input"
-                                        value="{{ $rest && $rest->break_start ? $rest->break_start->format('H:i') : '' }}">
+                                        value="{{ $rest && $rest->break_start ? \Carbon\Carbon::parse($rest->break_start)->format('H:i') : '' }}">
                                     <span class="attendance-detail__separator">〜</span>
                                     <input type="time" name="break_end[]" class="attendance-detail__input"
-                                        value="{{ $rest && $rest->break_end ? $rest->break_end->format('H:i') : '' }}">
+                                        value="{{ $rest && $rest->break_end ? \Carbon\Carbon::parse($rest->break_end)->format('H:i') : '' }}">
                                 </div>
                             @endif
                         </td>
