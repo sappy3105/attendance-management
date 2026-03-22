@@ -9,7 +9,7 @@ use Laravel\Fortify\Http\Controllers\AuthenticatedSessionController;
 // トップページ（ログイン状態により分岐）
 Route::get('/', function () {
     if (!Auth::check()) return view('auth.login');
-    return Auth::user()->role == 2
+    return Auth::user()->role === 2
         ? redirect()->route('admin.attendance.list')
         : redirect()->route('attendance.index');
 });
@@ -26,16 +26,16 @@ Route::middleware('auth')->group(function () {
     Route::get('/attendance', [AttendanceController::class, 'index'])->name('attendance.index');
 
     // 出勤処理
-    Route::post('/attendance/work-start', [AttendanceController::class, 'workStart']);
+    Route::post('/attendance/check-in', [AttendanceController::class, 'checkIn']);
 
     // 退勤処理
-    Route::post('/attendance/work-end', [AttendanceController::class, 'workEnd']);
+    Route::post('/attendance/check-out', [AttendanceController::class, 'checkOut']);
 
     // 休憩入処理
-    Route::post('/attendance/rest-start', [AttendanceController::class, 'restStart']);
+    Route::post('/attendance/break-start', [AttendanceController::class, 'breakStart']);
 
     // 休憩戻処理
-    Route::post('/attendance/rest-end', [AttendanceController::class, 'restEnd']);
+    Route::post('/attendance/break-end', [AttendanceController::class, 'breakEnd']);
 
     // 勤怠一覧表示
     Route::get('/attendance/list', [AttendanceController::class, 'list'])->name('attendance.list');

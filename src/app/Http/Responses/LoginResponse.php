@@ -26,7 +26,7 @@ class LoginResponse implements LoginResponseContract
         // return redirect()->intended(RouteServiceProvider::HOME);
 
         // 管理者の場合←いったんの設定。認証画面できあがったら上記の記述に書き換える
-        if ($user->role == '2') {
+        if ($user->role === 2) {
             return redirect()->route('admin.attendance.list');
         }
 

@@ -29,7 +29,7 @@ class AttendanceController extends Controller
     }
 
     /** 出勤ボタン押下 */
-    public function workStart(Request $request)
+    public function checkIn(Request $request)
     {
         $userId = Auth::id();
         $today = Carbon::today()->format('Y-m-d');
@@ -51,7 +51,7 @@ class AttendanceController extends Controller
     }
 
     /** 休憩入ボタン押下 */
-    public function restStart(Request $request)
+    public function breakStart(Request $request)
     {
         $userId = Auth::id();
         $today = Carbon::today()->format('Y-m-d');
@@ -61,7 +61,7 @@ class AttendanceController extends Controller
             ->where('date', $today)
             ->first();
 
-        if ($attendance) {
+        if ($attendance && $attendance->status === 2) {
             // 1. restsテーブルに開始時刻を保存
             Rest::create([
                 'attendance_id' => $attendance->id,
@@ -78,7 +78,7 @@ class AttendanceController extends Controller
     }
 
     /** 休憩戻ボタン押下 */
-    public function restEnd(Request $request)
+    public function breakEnd(Request $request)
     {
         $userId = Auth::id();
         $today = Carbon::today()->format('Y-m-d');
@@ -112,7 +112,7 @@ class AttendanceController extends Controller
     }
 
     /** 退勤ボタン押下 */
-    public function workEnd(Request $request)
+    public function checkOut(Request $request)
     {
         $userId = Auth::id();
         $today = Carbon::today()->format('Y-m-d');
@@ -262,35 +262,17 @@ class AttendanceController extends Controller
 
         // クエリパラメータから表示モードを取得（デフォルトは承認待ち：pending）
         $statusMode = $request->query('status', 'pending');
+        $statusId = ($statusMode === 'approved') ? 2 : 1;
 
-        if ($statusMode === 'approved') {
-            // 承認済み（status: 2）のデータを取得
-            $status = 'approved';
-            $requests = AttendanceCorrectRequest::where('user_id', $user->id)
-                ->where('status', 2)
-                ->orderBy('created_at', 'desc')
-                ->get();
-        } else {
-            // 承認待ち（status: 1）のデータを取得
-            $status = 'pending';
-            $requests = AttendanceCorrectRequest::where('user_id', $user->id)
-                ->where('status', 1)
-                ->orderBy('created_at', 'desc')
-                ->get();
-        }
+        $requests = AttendanceCorrectRequest::where('user_id', $user->id)
+            ->where('status', $statusId)
+            ->orderBy('created_at', 'desc')
+            ->get();
 
-        // 管理者の場合
-        if ($user->role === '2') {
-            // 管理者用のデータを取得
-            // $requests = ...
-            return view('admin.stamp_correction_request_list'); // 管理者用のViewを返す
-        }
-
-        // 一般ユーザーの場合
         return view('attendance_request_list', [
             'user' => $user,
             'requests' => $requests,
-            'status' => $status,
+            'status' => $statusMode,
         ]);
     }
 }
