@@ -11,6 +11,8 @@ use Illuminate\Support\ServiceProvider;
 
 use App\Http\Requests\LoginRequest as MyLoginRequest;
 use Laravel\Fortify\Http\Requests\LoginRequest as FortifyLoginRequest;
+use App\Http\Requests\RegisterRequest as MyRegisterRequest;
+use Laravel\Fortify\Http\Requests\RegisterRequest as FortifyRegisterRequest;
 
 use Laravel\Fortify\Fortify;
 use App\Http\Responses\LoginResponse as MyLoginResponse;
@@ -35,7 +37,7 @@ class FortifyServiceProvider extends ServiceProvider
         $this->app->singleton(FortifyLoginResponse::class, MyLoginResponse::class);
 
         // 新規登録リクエストの差し替え
-        // $this->app->singleton(FortifyRegisterRequest::class, MyRegisterRequest::class);
+        $this->app->singleton(FortifyRegisterRequest::class, MyRegisterRequest::class);
 
         // 新規登録後のレスポンス（メール認証誘導画面へ飛ばす設定）
         // $this->app->singleton(RegisterResponseContract::class, RegisterResponse::class);

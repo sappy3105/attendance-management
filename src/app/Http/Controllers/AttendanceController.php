@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use App\Http\Requests\AttendanceUpdateRequest;
 use App\Models\User;
 use App\Models\Attendance;
 use App\Models\Rest;
@@ -72,9 +73,10 @@ class AttendanceController extends Controller
             $attendance->update([
                 'status' => 3, // 3: 休憩中
             ]);
+        } else {
+            // 出勤中ではないのに休憩ボタンを押された場合の処理を追加すると親切です
+            return redirect()->back();
         }
-
-        return redirect()->back();
     }
 
     /** 休憩戻ボタン押下 */
@@ -92,7 +94,7 @@ class AttendanceController extends Controller
             // 1. break_end が null の最新の休憩レコードを1件取得
             $rest = Rest::where('attendance_id', $attendance->id)
                 ->whereNull('break_end')
-                ->latest()
+                ->orderBy('break_start', 'desc') // 開始が一番新しいものを取得
                 ->first();
 
             if ($rest) {
@@ -153,7 +155,10 @@ class AttendanceController extends Controller
             ->whereMonth('date', $date->month)
             ->get()
             ->keyBy(function ($item) {
-                return $item->date->format('Y-m-d');
+                // もしモデルの $casts で 'date' => 'date' となっていれば、$item->date は Carbon インスタンス
+                return ($item->date instanceof \Carbon\Carbon)
+                    ? $item->date->format('Y-m-d')
+                    : Carbon::parse($item->date)->format('Y-m-d');
             });
 
         return view('attendance_list', [
@@ -174,7 +179,7 @@ class AttendanceController extends Controller
         // 1. 元の勤怠データを取得
         $attendance = Attendance::where('user_id', $user->id)
             ->whereDate('date', $carbonDate)
-            ->first();
+            ->firstOrFail();
 
         // 2. この日の「承認待ち」の修正申請があるか確認
         $pendingRequest = null;
@@ -212,7 +217,7 @@ class AttendanceController extends Controller
     }
 
     /** 勤怠詳細の修正依頼 */
-    public function updateDetail(Request $request, $date)
+    public function updateDetail(AttendanceUpdateRequest $request, $date)
     {
         $user = Auth::user();
         $carbonDate = Carbon::parse($date);
@@ -220,7 +225,15 @@ class AttendanceController extends Controller
         // 元となる勤怠レコードを取得
         $attendance = Attendance::where('user_id', $user->id)
             ->whereDate('date', $carbonDate)
-            ->first();
+            ->firstOrFail();
+
+        $existsPending = AttendanceCorrectRequest::where('attendance_id', $attendance->id)
+            ->where('status', 1)
+            ->exists();
+
+        if ($existsPending) {
+            return redirect()->back()->withErrors(['already_pending' => '既に修正申請を提出済みです。承認されるまでお待ちください。']);
+        }
 
         DB::transaction(function () use ($request, $user, $carbonDate, $attendance) {
 

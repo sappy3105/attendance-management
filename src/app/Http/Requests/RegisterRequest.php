@@ -26,15 +26,20 @@ class RegisterRequest extends FormRequest
         $isPasswordValid = !empty($password) && mb_strlen($password) >= 8;
 
         return [
-            'name' => ['required', 'max:20'],
-            'email' => ['required', 'email', 'unique:users'],
+            'name' => ['required', 'max:255'],
+            'email' => ['required', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'min:8'],
             // パスワードのバリデーションをクリアしている時だけ、確認用のチェックを行う
-            'password_confirmation' => array_filter([
-                $isPasswordValid ? 'required' : null,
-                $isPasswordValid ? 'min:8' : null,
-                $isPasswordValid ? 'same:password' : null,
-            ]),
+
+            'password_confirmation' => $isPasswordValid
+                ? ['required', 'min:8', 'same:password']
+                : [],
+
+            // 'password_confirmation' => array_filter([
+            //     $isPasswordValid ? 'required' : null,
+            //     $isPasswordValid ? 'min:8' : null,
+            //     $isPasswordValid ? 'same:password' : null,
+            // ]),
         ];
     }
 
@@ -42,7 +47,6 @@ class RegisterRequest extends FormRequest
     {
         return [
             'name.required' => 'お名前を入力してください',
-            'name.max' => 'お名前は20文字以内で入力してください',
             'email.required' => 'メールアドレスを入力してください',
             'email.email' => 'メールアドレスはメール形式で入力してください',
             'email.unique' => 'このメールアドレスは既に登録されています',

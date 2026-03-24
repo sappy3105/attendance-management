@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Http\Requests\AttendanceUpdateRequest;
 use App\Models\User;
 use App\Models\Attendance;
 use App\Models\Rest;
@@ -121,7 +122,7 @@ class AdminAttendanceController extends Controller
     }
 
     /** 勤怠詳細の修正申請 (管理者用) */
-    public function update(Request $request, $id)
+    public function update(AttendanceUpdateRequest $request, $id)
     {
         $attendance = Attendance::findOrFail($id);
 
