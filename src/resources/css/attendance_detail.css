@@ -155,7 +155,6 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 .attendance-detail__time-group {
     display: flex;
     align-items: center;
-    gap: 15px;
 }
 
 .attendance-detail__text-time {
@@ -166,21 +165,18 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     font-size: 18px;
     font-weight: bold;
     letter-spacing: 2px;
-    text-indent: 2px;
     padding: 5px;
 }
 
 .attendance-detail__text-remarks {
     font-size: 18px;
     font-weight: bold;
-    /* 他のテキストと太さを合わせる場合 */
     line-height: 1.6;
     white-space: pre-wrap;
     text-align: left;
-    /* 明示的に左寄せにする */
 
     /* 入力モード時のtextareaやinputの開始位置と揃えるための調整 */
-    padding: 10px 0 10px 30px;
+    padding: 10px 0 10px 35px;
     display: block;
     width: 100%;
     box-sizing: border-box;

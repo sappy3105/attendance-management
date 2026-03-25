@@ -45,11 +45,14 @@ class AdminAttendanceController extends Controller
     {
         // IDから勤怠データを取得（スタッフ情報も一緒に）
         $attendance = Attendance::with(['user', 'rests'])->findOrFail($id);
+        $user = $attendance->user;
 
-        $pendingRequest = AttendanceCorrectRequest::where('attendance_id', $id)
-            ->where('status', 1)
+        // この勤怠に対して、まだ承認されていない申請があるか確認
+        $pendingRequest = AttendanceCorrectRequest::where('attendance_id', $attendance->id)
+            ->where('status', 1) // 1:承認待ち
             ->first();
 
+        // 承認待ちがあれば、その申請内容を表示データとして使う
         $isPending = !is_null($pendingRequest);
 
         // 表示データの切り替え
@@ -59,18 +62,24 @@ class AdminAttendanceController extends Controller
             'remarks'   => $isPending ? $pendingRequest->remarks : $attendance->remarks,
         ];
 
+        // $displayData = [
+        //     'check_in'  => $isPending
+        //         ? ($pendingRequest->check_in ? Carbon::parse($pendingRequest->check_in) : null)
+        //         : ($attendance->check_in ? Carbon::parse($attendance->check_in) : null),
+
+        //     'check_out' => $isPending
+        //         ? ($pendingRequest->check_out ? Carbon::parse($pendingRequest->check_out) : null)
+        //         : ($attendance->check_out ? Carbon::parse($attendance->check_out) : null),
+
+        //     'remarks'   => $isPending ? $pendingRequest->remarks : $attendance->remarks,
+        // ];
+
         $rests = $isPending
             ? RestCorrectRequest::where('attendance_correct_request_id', $pendingRequest->id)->get()
             : $attendance->rests;
 
         // ビューに $attendance と $user の両方を渡す
-        return view('admin.attendance_detail', [
-            'attendance' => $attendance,
-            'user'  => $attendance->user,
-            'rests' => $rests,
-            'isPending'  => $isPending,
-            'displayData' => $displayData,
-        ]);
+        return view('admin.attendance_detail', compact('attendance', 'user', 'isPending', 'displayData', 'rests'));
     }
 
     /** スタッフ一覧画面（管理者） */
@@ -122,29 +131,29 @@ class AdminAttendanceController extends Controller
     }
 
     /** 勤怠詳細の修正申請 (管理者用) */
-    public function update(AttendanceUpdateRequest $request, $id)
+    public function updateDetail(AttendanceUpdateRequest $request, $id)
     {
         $attendance = Attendance::findOrFail($id);
 
         DB::transaction(function () use ($request, $attendance) {
-            // 1. 勤怠修正申請テーブルに保存
-            $correctRequest = AttendanceCorrectRequest::create([
-                'attendance_id' => $attendance->id,
-                'user_id'       => $attendance->user_id, // 対象スタッフのID
-                'date'          => $attendance->date,
-                'check_in'      => $request->check_in,
-                'check_out'     => $request->check_out,
-                'remarks'       => $request->remarks,
-                'status'        => 1, // 承認待ち
+            // 1. attendancesテーブルの直接更新
+            $attendance->update([
+                'check_in'  => $request->check_in,
+                'check_out' => $request->check_out,
+                'remarks'   => $request->remarks,
             ]);
 
-            // 2. 休憩修正申請テーブルに保存
+            // 2. restsテーブル（休憩）の更新
+            // 管理者の修正時は、一度既存の休憩を削除して作り直すのが最も確実でシンプルな方法です
+            $attendance->rests()->delete();
+
             if ($request->has('break_start')) {
                 foreach ($request->break_start as $index => $start) {
                     $end = $request->break_end[$index] ?? null;
-                    if ($start || $end) {
-                        RestCorrectRequest::create([
-                            'attendance_correct_request_id' => $correctRequest->id,
+
+                    // 開始・終了の両方が入力されている場合のみ保存
+                    if (!is_null($start) && $start !== '' && !is_null($end) && $end !== '') {
+                        $attendance->rests()->create([
                             'break_start' => $start,
                             'break_end'   => $end,
                         ]);
@@ -153,7 +162,7 @@ class AdminAttendanceController extends Controller
             }
         });
 
-        return redirect()->route('admin.attendance.detail', ['id' => $id]);
+        return redirect()->route('admin.attendance.detail')->with('success', '勤怠データを修正しました');
     }
 
     /** 申請一覧画面の表示 (管理者用) */
