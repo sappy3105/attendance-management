@@ -1,5 +1,5 @@
 .attendance-detail {
-    max-width: 800px;
+    max-width: 900px;
     margin: 60px auto;
     padding: 0 20px;
 }
@@ -54,6 +54,7 @@
 .attendance-detail__date-container {
     display: flex;
     align-items: center;
+    gap: 20px;
 }
 
 .attendance-detail__date-year {
@@ -85,10 +86,16 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 }
 
 /* 入力エリアのスタイル */
-.attendance-detail__time-group {
+.attendance-detail__item-group {
+    display: flex;
+    align-items: flex-start; /* エラーが複数行になっても入力欄は上に固定 */
+    gap: 20px; /* 入力欄とエラーの間の余白 */
+    width: 100%;
+}
+
+.attendance-detail__time-inputs {
     display: flex;
     align-items: center;
-    gap: 15px;
 }
 
 .attendance-detail__input {
@@ -106,12 +113,16 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 }
 
 .attendance-detail__separator {
+    width: 85px;
+    display: inline-block;
+    text-align: center;
     font-weight: bold;
 }
 
 .attendance-detail__textarea {
     width: 100%;
-    padding: 12px;
+    max-width: 400px;
+    padding: 10px;
     border: 1px solid #ddd;
     border-radius: 4px;
     font-size: 18px;
@@ -119,7 +130,34 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     box-sizing: border-box;
 }
 
+/* バリデーション */
+.attendance-detail__error-message {
+    min-width: 200px;
+    color: #ff4d4b;
+    font-size: 14px;
+    line-height: 1.4;
+    flex: 1;
+}
+
+.error-item {
+    display: block; /* 確実に改行させる */
+    margin-bottom: 4px; /* エラー同士が近すぎないように微調整 */
+}
+
+/* いらないかも */
+.attendance-detail__pending-msg {
+    color: #ff4d4b;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
 /* テキスト表示時のスタイル */
+.attendance-detail__time-group {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
 .attendance-detail__text-time {
     display: inline-block;
     width: 130px;
@@ -147,6 +185,7 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     width: 100%;
     box-sizing: border-box;
 }
+
 
 
 /* ボタンエリア */

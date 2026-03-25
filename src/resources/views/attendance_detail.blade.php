@@ -43,12 +43,22 @@
                                 </span>
                             </div>
                         @else
-                            <div class="attendance-detail__time-group">
-                                <input type="time" name="check_in" class="attendance-detail__input"
-                                    value="{{ $displayData['check_in'] ? \Carbon\Carbon::parse($displayData['check_in'])->format('H:i') : '' }}">
-                                <span class="attendance-detail__separator">〜</span>
-                                <input type="time" name="check_out" class="attendance-detail__input"
-                                    value="{{ $displayData['check_out'] ? \Carbon\Carbon::parse($displayData['check_out'])->format('H:i') : '' }}">
+                            <div class="attendance-detail__item-group">
+                                <div class="attendance-detail__time-inputs">
+                                    <input type="time" name="check_in" class="attendance-detail__input"
+                                        value="{{ $displayData['check_in'] ? \Carbon\Carbon::parse($displayData['check_in'])->format('H:i') : '' }}">
+                                    <span class="attendance-detail__separator">〜</span>
+                                    <input type="time" name="check_out" class="attendance-detail__input"
+                                        value="{{ $displayData['check_out'] ? \Carbon\Carbon::parse($displayData['check_out'])->format('H:i') : '' }}">
+                                </div>
+                                <div class="attendance-detail__error-message">
+                                    @error('check_in')
+                                        <div class="error-item">{{ $message }}</div>
+                                    @enderror
+                                    @error('check_out')
+                                        <div class="error-item">{{ $message }}</div>
+                                    @enderror
+                                </div>
                             </div>
                         @endif
                     </td>
@@ -79,12 +89,22 @@
                                     </span>
                                 </div>
                             @else
-                                <div class="attendance-detail__time-group">
-                                    <input type="time" name="break_start[]" class="attendance-detail__input"
-                                        value="{{ $rest && $rest->break_start ? \Carbon\Carbon::parse($rest->break_start)->format('H:i') : '' }}">
-                                    <span class="attendance-detail__separator">〜</span>
-                                    <input type="time" name="break_end[]" class="attendance-detail__input"
-                                        value="{{ $rest && $rest->break_end ? \Carbon\Carbon::parse($rest->break_end)->format('H:i') : '' }}">
+                                <div class="attendance-detail__item-group">
+                                    <div class="attendance-detail__time-inputs">
+                                        <input type="time" name="break_start[]" class="attendance-detail__input"
+                                            value="{{ $rest && $rest->break_start ? \Carbon\Carbon::parse($rest->break_start)->format('H:i') : '' }}">
+                                        <span class="attendance-detail__separator">〜</span>
+                                        <input type="time" name="break_end[]" class="attendance-detail__input"
+                                            value="{{ $rest && $rest->break_end ? \Carbon\Carbon::parse($rest->break_end)->format('H:i') : '' }}">
+                                    </div>
+                                    <div class="attendance-detail__error-message">
+                                        @error("break_start.$index")
+                                            <div class="error-item">{{ $message }}</div>
+                                        @enderror
+                                        @error("break_end.$index")
+                                            <div class="error-item">{{ $message }}</div>
+                                        @enderror
+                                    </div>
                                 </div>
                             @endif
                         </td>
@@ -98,7 +118,21 @@
                             {{-- 申請中の時はテキストのみ表示 --}}
                             <div class="attendance-detail__text-remarks">{!! nl2br(e($displayData['remarks'])) !!}</div>
                         @else
-                            <textarea name="remarks" class="attendance-detail__textarea" rows="4">{{ $displayData['remarks'] }}</textarea>
+                            <div class="attendance-detail__item-group">
+                                <textarea name="remarks" class="attendance-detail__textarea" rows="4">{{ $displayData['remarks'] }}</textarea>
+                                <div class="attendance-detail__error-message">
+                                    @error('remarks')
+                                        <div class="error-item">{{ $message }}</div>
+                                    @enderror
+
+                                    {{-- 前にアドバイスした「二重申請ガード」のエラーもここに出すと親切です --}}
+                                    @error('already_pending')
+                                        <div class="error-item">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+
+                            </div>
                         @endif
                     </td>
                 </tr>
