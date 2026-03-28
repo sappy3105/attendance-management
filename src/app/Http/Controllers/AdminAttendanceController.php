@@ -43,11 +43,11 @@ class AdminAttendanceController extends Controller
     /** 勤怠詳細画面（管理者） */
     public function showDetail($id)
     {
-        // IDから勤怠データを取得（スタッフ情報も一緒に）
+        // 1. IDから勤怠データを取得（スタッフ情報と休憩情報も一緒に）
         $attendance = Attendance::with(['user', 'rests'])->findOrFail($id);
         $user = $attendance->user;
 
-        // この勤怠に対して、まだ承認されていない申請があるか確認
+        // 2. この勤怠に対して「承認待ち」の修正申請があるか確認
         $pendingRequest = AttendanceCorrectRequest::where('attendance_id', $attendance->id)
             ->where('status', 1) // 1:承認待ち
             ->first();
@@ -55,25 +55,14 @@ class AdminAttendanceController extends Controller
         // 承認待ちがあれば、その申請内容を表示データとして使う
         $isPending = !is_null($pendingRequest);
 
-        // 表示データの切り替え
+        // 3. 画面に表示する値を決定（申請中なら申請データ、なければ元のデータ）
         $displayData = [
             'check_in'  => $isPending ? $pendingRequest->check_in : $attendance->check_in,
             'check_out' => $isPending ? $pendingRequest->check_out : $attendance->check_out,
             'remarks'   => $isPending ? $pendingRequest->remarks : $attendance->remarks,
         ];
 
-        // $displayData = [
-        //     'check_in'  => $isPending
-        //         ? ($pendingRequest->check_in ? Carbon::parse($pendingRequest->check_in) : null)
-        //         : ($attendance->check_in ? Carbon::parse($attendance->check_in) : null),
-
-        //     'check_out' => $isPending
-        //         ? ($pendingRequest->check_out ? Carbon::parse($pendingRequest->check_out) : null)
-        //         : ($attendance->check_out ? Carbon::parse($attendance->check_out) : null),
-
-        //     'remarks'   => $isPending ? $pendingRequest->remarks : $attendance->remarks,
-        // ];
-
+        // 4. 休憩データの切り替え
         $rests = $isPending
             ? RestCorrectRequest::where('attendance_correct_request_id', $pendingRequest->id)->get()
             : $attendance->rests;
@@ -130,7 +119,7 @@ class AdminAttendanceController extends Controller
         ]);
     }
 
-    /** 勤怠詳細の修正申請 (管理者用) */
+    /** 勤怠詳細の修正 (管理者用) */
     public function updateDetail(AttendanceUpdateRequest $request, $id)
     {
         $attendance = Attendance::findOrFail($id);
@@ -162,7 +151,8 @@ class AdminAttendanceController extends Controller
             }
         });
 
-        return redirect()->route('admin.attendance.detail')->with('success', '勤怠データを修正しました');
+        return redirect()->route('admin.attendance.detail', ['id' => $id])
+            ->with('success', '勤怠データを修正しました');
     }
 
     /** 申請一覧画面の表示 (管理者用) */

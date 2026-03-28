@@ -174,46 +174,41 @@ class AttendanceController extends Controller
     public function showDetail($date)
     {
         $user = Auth::user(); // 現在のログインユーザー
-        $carbonDate = Carbon::parse($date);
 
         // 1. 元の勤怠データを取得
         $attendance = Attendance::where('user_id', $user->id)
-            ->whereDate('date', $carbonDate)
+            ->whereDate('date', $date)
+            ->with('rests')
             ->firstOrFail();
 
-        // 2. この日の「承認待ち」の修正申請があるか確認
-        $pendingRequest = null;
-        if ($attendance) {
-            $pendingRequest = AttendanceCorrectRequest::where('attendance_id', $attendance->id)
-                ->where('status', 1) // 1:承認待ち
-                ->with('restCorrectRequests') // 休憩の申請データも一緒に取得
-                ->first();
-        }
+        // 2. この勤怠に対して「承認待ち」の修正申請があるか確認
+        $pendingRequest = AttendanceCorrectRequest::where('attendance_id', $attendance->id)
+            ->where('status', 1) // 1:承認待ち
+            ->first();
+
+        // 承認待ちがあれば、その申請内容を表示データとして使う
+        $isPending = !is_null($pendingRequest);
 
         // 3. 画面に表示する値を決定（申請中なら申請データ、なければ元のデータ）
         $displayData = [
-            'check_in'  => $pendingRequest ? $pendingRequest->check_in : ($attendance ? $attendance->check_in : null),
-            'check_out' => $pendingRequest ? $pendingRequest->check_out : ($attendance ? $attendance->check_out : null),
-            'remarks'   => $pendingRequest ? $pendingRequest->remarks : ($attendance ? $attendance->remarks : ''),
+            'check_in'  => $isPending ? $pendingRequest->check_in : $attendance->check_in,
+            'check_out' => $isPending ? $pendingRequest->check_out : $attendance->check_out,
+            'remarks'   => $isPending ? $pendingRequest->remarks : $attendance->remarks,
         ];
 
-        // 4. 休憩データ
-        if ($pendingRequest) {
-            // 申請中の休憩データをそのまま取得（$castsによって各要素は既にCarbonになっています）
-            $rests = $pendingRequest->restCorrectRequests;
-        } else {
-            // 元の休憩データ
-            $rests = $attendance ? $attendance->rests : collect();
-        }
+        // 4. 休憩データの切り替え
+        $rests = $isPending
+            ? RestCorrectRequest::where('attendance_correct_request_id', $pendingRequest->id)->get()
+            : $attendance->rests;
 
-        return view('attendance_detail', [
-            'user' => $user,
-            'attendance' => $attendance,
-            'date' => $date,
-            'displayData' => $displayData,
-            'rests' => $rests,
-            'isPending' => !is_null($pendingRequest),
-        ]);
+
+        return view('attendance_detail', compact(
+            'attendance',
+            'user',
+            'isPending',
+            'displayData',
+            'rests'
+        ));
     }
 
     /** 勤怠詳細の修正依頼 */
@@ -265,7 +260,8 @@ class AttendanceController extends Controller
             }
         });
 
-        return redirect()->route('attendance.detail', ['date' => $date]);
+        return redirect()->route('attendance.detail', ['date' => $date])
+            ->with('success', '勤怠データの修正申請をしました');
     }
 
     /** 申請一覧画面の表示 */

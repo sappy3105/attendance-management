@@ -12,6 +12,18 @@
     font-weight: bold;
 }
 
+/* 勤怠修正成功メッセージ */
+.attendance-detail__alert--success {
+    margin-bottom: 20px;
+    padding: 12px;
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+    border-radius: 4px;
+    text-align: center;
+    font-weight: bold;
+}
+
 .attendance-detail__table {
     width: 100%;
     background: #fff;
@@ -125,7 +137,7 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     padding: 10px;
     border: 1px solid #ddd;
     border-radius: 4px;
-    font-size: 18px;
+    font-size: 16px;
     resize: none;
     box-sizing: border-box;
 }
