@@ -28,7 +28,7 @@ class AttendanceSeeder extends Seeder
             // 各ユーザーごとに1日ずつループ
             for ($date = $startDate->copy(); $date <= $endDate; $date->addDay()) {
 
-                // 土日はデータを作らない場合は以下を有効化（任意）
+                // 土日はデータを作らない場合は以下を有効化
                 if ($date->isWeekend()) continue;
 
                 // 3. 勤怠レコードの作成（ユーザーIDと日付のペアで重複チェック）
@@ -40,7 +40,7 @@ class AttendanceSeeder extends Seeder
                     [
                         'check_in'  => '09:00:00',
                         'check_out' => '18:00:00',
-                        'status'    => 4, //退勤済み
+                        'status'    => 3, //退勤済み
                         'remarks'   => '通常の勤務',
                     ]
                 );

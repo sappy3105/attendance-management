@@ -44,7 +44,7 @@ class AttendanceController extends Controller
                 'user_id' => $userId,
                 'date' => $today,
                 'check_in' => $now,
-                'status' => 2, // 2:出勤中
+                'status' => 1, // 1:出勤中
             ]);
         }
 
@@ -62,7 +62,7 @@ class AttendanceController extends Controller
             ->where('date', $today)
             ->first();
 
-        if ($attendance && $attendance->status === 2) {
+        if ($attendance && $attendance->status === 1) {
             // 1. restsテーブルに開始時刻を保存
             Rest::create([
                 'attendance_id' => $attendance->id,
@@ -71,7 +71,7 @@ class AttendanceController extends Controller
 
             // 2. attendancesテーブルのステータスを「休憩中」に更新
             $attendance->update([
-                'status' => 3, // 3: 休憩中
+                'status' => 2, // 2: 休憩中
             ]);
         } else {
             // 出勤中ではないのに休憩ボタンを押された場合の処理を追加すると親切です
@@ -105,7 +105,7 @@ class AttendanceController extends Controller
 
                 // 3. 勤怠ステータスを「出勤中」に戻す
                 $attendance->update([
-                    'status' => 2, // 2: 出勤中
+                    'status' => 1, // 1: 出勤中
                 ]);
             }
         }
@@ -127,7 +127,7 @@ class AttendanceController extends Controller
             // 退勤時刻を保存し、ステータスを「4: 退勤済」に更新
             $attendance->update([
                 'check_out' => Carbon::now()->format('H:i:s'),
-                'status' => 4, // 4: 退勤済
+                'status' => 3, // 3: 退勤済
             ]);
         }
 

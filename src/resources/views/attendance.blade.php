@@ -6,11 +6,11 @@
         <div class="attendance__status">
             @if (!$attendance)
                 勤務外
-            @elseif($attendance->status === 2)
+            @elseif($attendance->status === 1)
                 出勤中
-            @elseif($attendance->status === 3)
+            @elseif($attendance->status === 2)
                 休憩中
-            @elseif($attendance->status === 4)
+            @elseif($attendance->status === 3)
                 退勤済
             @endif
         </div>
@@ -36,7 +36,7 @@
                 </form>
 
                 {{-- 2. 出勤中の場合：退勤と休憩入を表示 --}}
-            @elseif($attendance->status === 2)
+            @elseif($attendance->status === 1)
                 <div class="attendance__button-group">
                     <form action="/attendance/check-out" method="post">
                         @csrf
@@ -49,7 +49,7 @@
                 </div>
 
                 {{-- 3. 休憩中の場合：休憩戻を表示 --}}
-            @elseif($attendance->status === 3)
+            @elseif($attendance->status === 2)
                 <div class="attendance__panel">
                     <form action="/attendance/break-end" method="post">
                         @csrf
@@ -58,7 +58,7 @@
                 </div>
 
                 {{-- 4. 退勤後の場合：メッセージ表示 --}}
-            @elseif($attendance->status === 4)
+            @elseif($attendance->status === 3)
                 <div class="attendance__message">
                     お疲れ様でした。
                 </div>
