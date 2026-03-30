@@ -21,7 +21,7 @@ Route::get('/admin/login', fn() => view('admin.auth.login'))->name('admin.login'
 Route::post('/admin/login', [AuthenticatedSessionController::class, 'store']);
 
 // ログイン後のみアクセス可能なグループ
-Route::middleware('auth')->group(function () {
+Route::middleware('auth', 'verified')->group(function () {
     // 打刻画面表示
     Route::get('/attendance', [AttendanceController::class, 'index'])->name('attendance.index');
 

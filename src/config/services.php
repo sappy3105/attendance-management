@@ -35,4 +35,5 @@ return [
         ],
     ],
 
+    'mail_dashboard' => env('MAIL_DASHBOARD_URL'),
 ];

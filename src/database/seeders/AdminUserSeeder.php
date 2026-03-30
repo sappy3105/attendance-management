@@ -20,6 +20,7 @@ class AdminUserSeeder extends Seeder
                 'name' => '管理者 太郎',
                 'password' => Hash::make('admin_pass'),
                 'role' => '2', // 2: 管理者
+                'email_verified_at' => now(), //管理者はメール認証済みで登録
             ]
         );
     }

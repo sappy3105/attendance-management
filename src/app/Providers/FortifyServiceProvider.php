@@ -17,8 +17,14 @@ use Laravel\Fortify\Http\Requests\RegisterRequest as FortifyRegisterRequest;
 use Laravel\Fortify\Fortify;
 use App\Http\Responses\LoginResponse as MyLoginResponse;
 use Laravel\Fortify\Contracts\LoginResponse as FortifyLoginResponse;
+use App\Http\Responses\RegisterResponse;
+use Laravel\Fortify\Contracts\RegisterResponse as RegisterResponseContract;
+use App\Http\Responses\LoginResponse;
+use Laravel\Fortify\Contracts\LoginResponse as LoginResponseContract;
 use App\Http\Responses\LogoutResponse;
 use Laravel\Fortify\Contracts\LogoutResponse as LogoutResponseContract;
+use App\Http\Responses\VerifyEmailResponse;
+use Laravel\Fortify\Contracts\VerifyEmailResponse as VerifyEmailResponseContract;
 
 
 use App\Models\User;
@@ -40,25 +46,15 @@ class FortifyServiceProvider extends ServiceProvider
         $this->app->singleton(FortifyRegisterRequest::class, MyRegisterRequest::class);
 
         // 新規登録後のレスポンス（メール認証誘導画面へ飛ばす設定）
-        // $this->app->singleton(RegisterResponseContract::class, RegisterResponse::class);
+        $this->app->singleton(RegisterResponseContract::class, RegisterResponse::class);
 
         // ログイン後のレスポンス（未認証なら誘導画面、済みならHOMEへ）
-        // $this->app->singleton(LoginResponseContract::class, LoginResponse::class);
+        $this->app->singleton(LoginResponseContract::class, LoginResponse::class);
 
-        // メール認証完了後のレスポンス（プロフィール編集画面へ）
-        // $this->app->singleton(VerifyEmailResponseContract::class, VerifyEmailResponse::class);
+        // メール認証完了後のレスポンス（打刻画面へ）
+        $this->app->singleton(VerifyEmailResponseContract::class, VerifyEmailResponse::class);
 
         // ログアウト後のリダイレクト先
-        // $this->app->instance(LogoutResponse::class, new class implements LogoutResponse {
-        //     public function toResponse($request)
-        //     {
-        //         if (request()->is('admin/*') || request()->is('admin')) {
-        //             return redirect('/admin/login');
-        //         }
-        //         return redirect('/login');
-        //     }
-        // });
-
         $this->app->singleton(LogoutResponseContract::class, LogoutResponse::class);
     }
 
@@ -84,9 +80,9 @@ class FortifyServiceProvider extends ServiceProvider
         });
 
         //メール認証機能
-        // Fortify::verifyEmailView(function () {
-        //     return view('auth.verify-email');
-        // });
+        Fortify::verifyEmailView(function () {
+            return view('auth.verify-email');
+        });
 
         // ログイン制限（RateLimiter）
         RateLimiter::for('login', function (Request $request) {
