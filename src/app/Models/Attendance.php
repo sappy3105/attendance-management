@@ -21,8 +21,8 @@ class Attendance extends Model
 
     protected $casts = [
         'date' => 'date',
-        'check_in' => 'datetime',
-        'check_out' => 'datetime',
+        'check_in' => 'immutable_datetime:H:i',
+        'check_out' => 'immutable_datetime:H:i',
     ];
 
     public function rests()
@@ -36,54 +36,51 @@ class Attendance extends Model
     }
 
     /**
-     * 休憩時間の合計を「H:i」形式で返す
+     * 休憩時間の合計を「分（数値）」で返す（計算用）
      */
-    public function getTotalRestTime()
+    public function getTotalRestMinutes(): int
     {
-        $totalMinutes = 0;
-        foreach ($this->rests as $rest) {
-            if ($rest->break_start && $rest->break_end) {
-                $start = Carbon::parse($rest->break_start);
-                $end = Carbon::parse($rest->break_end);
-                $totalMinutes += $start->diffInMinutes($end);
+        $totalMinutes = 0; // 1. 合計分を保持する変数を0で初期化
+        foreach ($this->rests as $rest) { // 2. この勤怠に紐づく休憩レコードを1つずつ取り出す
+            if ($rest->break_start && $rest->break_end) { // 3. 開始と終了の両方の時刻がある場合のみ計算する
+                // キャストをH:iにしている場合、Carbon::parseが必要
+                $start = Carbon::parse($rest->break_start); // 4. 文字列の開始時刻をCarbonオブジェクトに変換
+                $end = Carbon::parse($rest->break_end); // 5. 文字列の終了時刻をCarbonオブジェクトに変換
+                $totalMinutes += $start->diffInMinutes($end); // 6. 開始と終了の差（分）を計算して合計に足す
             }
         }
-
-        $hours = floor($totalMinutes / 60);
-        $minutes = $totalMinutes % 60;
-        return sprintf('%d:%02d', $hours, $minutes);
+        return $totalMinutes; // 7. 全ての休憩を足し合わせた合計分を返す
     }
 
     /**
-     * 実働時間（退勤 - 出勤 - 休憩）を「H:i」形式で返す
+     * 休憩時間の合計を「H:i」形式で返す（表示用）
+     */
+    public function getTotalRestTime()
+    {
+        $totalMinutes = $this->getTotalRestMinutes(); // 1. 上記のメソッドを使い、合計分を取得
+        $hours = floor($totalMinutes / 60); // 2. 合計分を60で割り、小数点以下を切り捨てて「時間」を出す
+        $minutes = $totalMinutes % 60; // 3. 合計分を60で割った「余り」を「分」として出す
+        return sprintf('%d:%02d', $hours, $minutes); // 4. 「時間:0埋めした2桁の分」という形式の文字列にして返す
+    }
+
+    /**
+     * 実働時間（退勤 - 出勤 - 休憩）を「H:i」形式で返す（表示用）
      */
     public function getTotalWorkTime()
     {
-        if (!$this->check_in || !$this->check_out) {
-            return '';
+        // 出勤・退勤のどちらかがなければ空文字を返す
+        if (!$this->check_in || !$this->check_out) { // 1. 出勤か退勤のどちらかが欠けていれば（退勤前など）
+            return ''; // 2. 何も計算せずに空文字を返す（エラー防止のガード節）
         }
 
-        $start = Carbon::parse($this->check_in);
-        $end = Carbon::parse($this->check_out);
+        $start = Carbon::parse($this->check_in); // 3. 出勤時刻をCarbonオブジェクトに変換
+        $end = Carbon::parse($this->check_out); // 4. 退勤時刻をCarbonオブジェクトに変換
 
-        // 滞在総時間（分）
-        $totalStayMinutes = $start->diffInMinutes($end);
+        // 5. (出勤と退勤の差分) から (休憩の合計分) を引いて、実働の合計分を出す
+        $workMinutes = $start->diffInMinutes($end) - $this->getTotalRestMinutes();
 
-        // 休憩総時間（分）
-        $totalRestMinutes = 0;
-        foreach ($this->rests as $rest) {
-            if ($rest->break_start && $rest->break_end) {
-                $totalRestMinutes += Carbon::parse($rest->break_start)->diffInMinutes(Carbon::parse($rest->break_end));
-            }
-        }
-
-        $workMinutes = $totalStayMinutes - $totalRestMinutes;
-
-        // マイナスにならないよう調整
-        if ($workMinutes < 0) $workMinutes = 0;
-
-        $hours = floor($workMinutes / 60);
-        $minutes = $workMinutes % 60;
-        return sprintf('%d:%02d', $hours, $minutes);
+        $hours = floor($workMinutes / 60); // 6. 実働分を60で割り、時間を出す
+        $minutes = $workMinutes % 60; // 7. 実働分を60で割った余りを出す
+        return sprintf('%d:%02d', $hours, $minutes); // 8. 形式を整えた文字列で返す
     }
 }

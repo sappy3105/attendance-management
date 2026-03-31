@@ -21,6 +21,7 @@ class User extends Authenticatable implements MustVerifyEmail //メール認証�
         'name',
         'email',
         'password',
+        'role',
     ];
 
     /**

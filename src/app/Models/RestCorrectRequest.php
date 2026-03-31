@@ -16,8 +16,8 @@ class RestCorrectRequest extends Model
     ];
 
     protected $casts = [
-        'break_start' => 'datetime',
-        'break_end'   => 'datetime',
+        'break_start' => 'immutable_datetime:H:i',
+        'break_end'   => 'immutable_datetime:H:i',
     ];
 
     public function attendanceCorrectRequest()

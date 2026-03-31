@@ -21,8 +21,8 @@ class AttendanceCorrectRequest extends Model
 
     protected $casts = [
         'date' => 'date',
-        'check_in' => 'datetime',
-        'check_out' => 'datetime',
+        'check_in' => 'immutable_datetime:H:i',
+        'check_out' => 'immutable_datetime:H:i',
     ];
 
     public function restCorrectRequests()
@@ -34,5 +34,11 @@ class AttendanceCorrectRequest extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    //いらないかもしれない
+    public function attendance()
+    {
+        return $this->belongsTo(Attendance::class);
     }
 }
