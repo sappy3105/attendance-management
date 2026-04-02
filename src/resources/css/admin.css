@@ -103,3 +103,24 @@
     text-align: center;
     box-sizing: border-box;
 }
+
+/* CSV出力ボタン */
+.attendance-list__actions {
+    margin-top: 30px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.attendance-list__export-link {
+    background-color: #000;
+    color: #fff;
+    border: none;
+    padding: 10px 40px;
+    font-size: 18px;
+    letter-spacing: 3px;
+    text-indent: 3px;
+    border-radius: 5px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}

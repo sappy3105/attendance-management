@@ -79,5 +79,6 @@ Route::middleware('auth', 'verified')->group(function () {
         Route::post('/stamp_correction_request/approve/{attendance_correct_request_id}', [AdminAttendanceController::class, 'approve'])
             ->name('admin.attendance.approve');
 
+        Route::get('/export', [AdminAttendanceController::class, 'export'])->name('admin.export');
     });
 });

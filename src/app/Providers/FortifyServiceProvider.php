@@ -19,8 +19,6 @@ use App\Http\Responses\LoginResponse as MyLoginResponse;
 use Laravel\Fortify\Contracts\LoginResponse as FortifyLoginResponse;
 use App\Http\Responses\RegisterResponse;
 use Laravel\Fortify\Contracts\RegisterResponse as RegisterResponseContract;
-use App\Http\Responses\LoginResponse;
-use Laravel\Fortify\Contracts\LoginResponse as LoginResponseContract;
 use App\Http\Responses\LogoutResponse;
 use Laravel\Fortify\Contracts\LogoutResponse as LogoutResponseContract;
 use App\Http\Responses\VerifyEmailResponse;
@@ -49,7 +47,7 @@ class FortifyServiceProvider extends ServiceProvider
         $this->app->singleton(RegisterResponseContract::class, RegisterResponse::class);
 
         // ログイン後のレスポンス（未認証なら誘導画面、済みならHOMEへ）
-        $this->app->singleton(LoginResponseContract::class, LoginResponse::class);
+        $this->app->singleton(FortifyLoginResponse::class, MyLoginResponse::class);
 
         // メール認証完了後のレスポンス（打刻画面へ）
         $this->app->singleton(VerifyEmailResponseContract::class, VerifyEmailResponse::class);

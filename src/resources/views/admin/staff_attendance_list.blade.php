@@ -50,5 +50,11 @@
                 @endforeach
             </tbody>
         </table>
+        <div class="attendance-list__actions">
+            {{-- 通常時：修正ボタンを表示 --}}
+            <a href="{{ route('admin.export', ['id' => $user->id, 'month' => $currentMonth->format('Y-m')]) }}" class="attendance-list__export-link">
+            CSV出力
+            </a>
+        </div>
     </div>
 @endsection

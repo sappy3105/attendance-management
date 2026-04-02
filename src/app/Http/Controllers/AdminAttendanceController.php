@@ -11,6 +11,7 @@ use App\Models\Rest;
 use App\Models\AttendanceCorrectRequest;
 use App\Models\RestCorrectRequest;
 use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 use Illuminate\Support\Facades\DB;
 
 class AdminAttendanceController extends Controller
@@ -216,5 +217,85 @@ class AdminAttendanceController extends Controller
         });
 
         return redirect()->back()->with('message', '承認しました');
+    }
+
+
+    /** CSVへの書き出し処理 */
+    public function export(Request $request)
+    {
+        // 1. パラメータ（IDと月）を受け取る
+        $userId = $request->input('id');
+        $monthString = $request->input('month', now()->format('Y-m'));
+        $user = User::findOrFail($userId);
+
+        // 1. その月の開始日と終了日を取得
+        $startOfMonth = Carbon::parse($monthString)->startOfMonth();
+        $endOfMonth = Carbon::parse($monthString)->endOfMonth();
+
+        // 2. 指定期間の勤怠データを取得し、日付をキーにしたコレクションにする
+        $attendances = Attendance::with('user', 'rests')
+            ->where('user_id', $userId)
+            ->whereBetween('date', [$startOfMonth, $endOfMonth])
+            ->get()
+            ->keyBy(function($item) {
+                return $item->date->format('Y-m-d');
+        });
+
+        $csvHeader = ['スタッフ名', '日付', '出勤', '退勤', '休憩時間合計', '労働時間合計', '備考'];
+        $csvData = [];
+        $csvData[] = $csvHeader;
+
+        // 3. 1日から末日まで1日ずつループを回す
+        $period = CarbonPeriod::create($startOfMonth, $endOfMonth);
+
+        foreach ($period as $date) {
+            $dateStr = $date->format('Y-m-d');
+            // その日の勤怠データがあるか確認
+            $attendance = $attendances->get($dateStr);
+
+            // 日付フォーマットを定義
+            $formattedDate = $date->format('Y/m/d');
+
+            if ($attendance) {
+                $csvData[] = [
+                    $user->name,
+                    $formattedDate,
+                    $attendance->check_in ? $attendance->check_in->format('H:i') : '',
+                    $attendance->check_out ? $attendance->check_out->format('H:i') : '',
+                    $attendance->getTotalRestTime(), //休憩時間合計
+                    $attendance->getTotalWorkTime(), //労働時間合計
+                    $attendance->remarks,//備考
+                ];
+            } else {
+            // データがない場合（日付と名前以外は空欄）
+                $csvData[] = [
+                    $user->name,
+                    $formattedDate,
+                    '', '', '', '', ''
+                ];
+            }
+        }
+
+        $filename = 'attendance_' . $user->name . '_' . str_replace('-', '', $monthString) . '.csv';
+
+        // 3. ファイル書き出し処理
+        $callback = function () use ($csvData) {
+            $file = fopen('php://output', 'w');
+            fputs($file, "\xEF\xBB\xBF");// 文字化け対策(BOM)
+
+            // 2. データを1行ずつ取り出して書き込む
+            foreach ($csvData as $row) {
+                // $row が配列であることを確認して書き込む
+                fputcsv($file, $row);
+            }
+            fclose($file);
+        };
+
+        // 4. レスポンスヘッダーの設定
+        $headers = [
+            "Content-type" => "text/csv",//CSVデータという宣言
+            "Content-Disposition" => "attachment; filename=$filename",//画面に表示せず、「添付ファイル（attachment）」として扱い、この「ファイル名（filename）」で保存してください、という指示
+        ];
+        return response()->stream($callback, 200, $headers);
     }
 }
