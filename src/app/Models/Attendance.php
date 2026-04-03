@@ -35,13 +35,23 @@ class Attendance extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function correctRequests()
+    {
+        return $this->hasMany(AttendanceCorrectRequest::class);
+    }
+
+    public function restCorrectRequests()
+    {
+        return $this->hasMany(RestCorrectRequest::class);
+    }
+
     /**
      * 休憩時間の合計を「分（数値）」で返す（計算用）
      */
     public function getTotalRestMinutes(): int
     {
         $totalMinutes = 0; // 1. 合計分を保持する変数を0で初期化
-        foreach ($this->rests as $rest) { // 2. この勤怠に紐づく休憩レコードを1つずつ取り出す
+        foreach ($this->rests ?? collect() as $rest) { // 2. この勤怠に紐づく休憩レコードを1つずつ取り出す。し休憩データが空っぽ（null）なら、空の箱（空のコレクション）を用意する
             if ($rest->break_start && $rest->break_end) { // 3. 開始と終了の両方の時刻がある場合のみ計算する
                 // キャストをH:iにしている場合、Carbon::parseが必要
                 $start = Carbon::parse($rest->break_start); // 4. 文字列の開始時刻をCarbonオブジェクトに変換
@@ -57,6 +67,11 @@ class Attendance extends Model
      */
     public function getTotalRestTime()
     {
+        // 出勤・退勤のどちらかがなければ空文字を返す
+        if (!$this->check_in || !$this->check_out) { // 1. 出勤か退勤のどちらかが欠けていれば（退勤前など）
+            return ''; // 2. 何も計算せずに空文字を返す（エラー防止）
+        }
+
         $totalMinutes = $this->getTotalRestMinutes(); // 1. 上記のメソッドを使い、合計分を取得
         $hours = floor($totalMinutes / 60); // 2. 合計分を60で割り、小数点以下を切り捨てて「時間」を出す
         $minutes = $totalMinutes % 60; // 3. 合計分を60で割った「余り」を「分」として出す

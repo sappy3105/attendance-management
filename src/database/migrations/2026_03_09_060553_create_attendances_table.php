@@ -23,7 +23,7 @@ return new class extends Migration
             $table->tinyInteger('status')->default(1)->comment('1:出勤中, 2:休憩中, 3:退勤済');
 
             // 出勤・退勤時間（秒単位まで保持できる time 型が扱いやすいです）
-            $table->time('check_in');
+            $table->time('check_in')->nullable();;
             $table->time('check_out')->nullable();
 
             // 備考（管理者修正時や申請時に必要）

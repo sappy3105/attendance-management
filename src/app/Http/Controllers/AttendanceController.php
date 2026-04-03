@@ -157,38 +157,44 @@ class AttendanceController extends Controller
         $user = Auth::user(); // 現在のログインユーザー
 
         // 1. 元の勤怠データを取得
-        $attendance = Attendance::where('user_id', $user->id)
+        $attendance = $user->attendances()
             ->whereDate('date', $date)
             ->with('rests')
-            ->firstOrFail();
-
-        // 2. この勤怠に対して「承認待ち」の修正申請があるか確認
-        $pendingRequest = AttendanceCorrectRequest::where('attendance_id', $attendance->id)
-            ->where('status', 1) // 1:承認待ち
             ->first();
 
-        // 承認待ちがあれば、その申請内容を表示データとして使う
+        // 2. この勤怠に対して「承認待ち」の修正申請があるか確認
+        $pendingRequest = $attendance?->correctRequests()->where('status', 1)->first();
+
         $isPending = !is_null($pendingRequest);
 
         // 3. 画面に表示する値を決定（申請中なら申請データ、なければ元のデータ）
         $displayData = [
-            'check_in'  => $isPending ? $pendingRequest->check_in : $attendance->check_in,
-            'check_out' => $isPending ? $pendingRequest->check_out : $attendance->check_out,
-            'remarks'   => $isPending ? $pendingRequest->remarks : $attendance->remarks,
+            'check_in'  => $isPending ? $pendingRequest->check_in : ($attendance?->check_in),
+            'check_out' => $isPending ? $pendingRequest->check_out : ($attendance?->check_out),
+            'remarks'   => $isPending ? $pendingRequest->remarks : ($attendance?->remarks),
         ];
 
         // 4. 休憩データの切り替え
-        $rests = $isPending
-            ? RestCorrectRequest::where('attendance_correct_request_id', $pendingRequest->id)->get()
-            : $attendance->rests;
+        // $rests = $isPending
+        //     ? $pendingRequest->restCorrectRequests // 申請中の休憩データ
+        //     : $attendance->rests;                   // 元の休憩データ
 
+        if ($isPending) {
+            $rests = $pendingRequest->restCorrectRequests; // 申請中の休憩データ
+        } else {
+            $rests = $attendance ? $attendance->rests : collect(); // 元の休憩データ
+        }
+
+
+        $date = Carbon::parse($date); // ここで日付をCarbon化しておく
 
         return view('attendance_detail', compact(
             'attendance',
             'user',
             'isPending',
             'displayData',
-            'rests'
+            'rests',
+            'date' // $attendanceがnullでもこれがあれば日付が表示できる
         ));
     }
 
@@ -196,43 +202,44 @@ class AttendanceController extends Controller
     public function updateDetail(AttendanceUpdateRequest $request, $date)
     {
         $user = Auth::user();
-        $carbonDate = Carbon::parse($date);
 
-        // 元となる勤怠レコードを取得
-        $attendance = Attendance::where('user_id', $user->id)
-            ->whereDate('date', $carbonDate)
-            ->firstOrFail();
+        // 1.元となる勤怠レコードを取得。データがなければ、「退勤済」の土台を作成
+        $attendance = $user->attendances()->firstOrCreate(
+            ['date' => $date],
+            ['status'    => 3] // 退勤済
+        );
 
-        $existsPending = AttendanceCorrectRequest::where('attendance_id', $attendance->id)
+        // 2. リレーションを使用して「承認待ち」の存在確認
+        $existsPending = $attendance->correctRequests()
             ->where('status', 1)
             ->exists();
 
         if ($existsPending) {
-            return redirect()->back()->withErrors(['already_pending' => '既に修正申請を提出済みです。承認されるまでお待ちください。']);
+            return redirect()->back()
+                ->withInput() // 入力内容を保持
+                ->withErrors(['already_pending' => '既に修正申請を提出済みです。承認されるまでお待ちください。']);
         }
 
-        DB::transaction(function () use ($request, $user, $carbonDate, $attendance) {
+        DB::transaction(function () use ($request, $user, $attendance, $date) {
 
-            // 1. 勤怠修正申請の作成（マイグレーションのカラム名に厳密に合わせました）
-            $correctRequest = AttendanceCorrectRequest::create([
-                'attendance_id' => $attendance->id,
-                'user_id'       => $user->id,
-                'date'          => $carbonDate->format('Y-m-d'),
-                'check_in'      => $request->check_in,  // Blade側のnameをcheck_inにする想定
-                'check_out'     => $request->check_out, // Blade側のnameをcheck_outにする想定
-                'remarks'       => $request->remarks,   // noteではなくremarks
-                'status'        => 1, // 1:承認待ち
+            // 3. 勤怠修正申請の作成
+            $correctRequest = $attendance->correctRequests()->create([
+                'user_id'   => $user->id,
+                'date'      => $date,
+                'check_in'  => $request->check_in,
+                'check_out' => $request->check_out,
+                'remarks'   => $request->remarks,
+                'status'    => 1, // 承認待ち
             ]);
 
-            // 2. 休憩修正申請の作成
+            // 4. 休憩修正申請の作成
             if ($request->has('break_start')) {
                 foreach ($request->break_start as $index => $start) {
                     $end = $request->break_end[$index] ?? null;
 
                     // 開始・終了の両方が入力されている場合のみ保存
-                    if (!is_null($start) && $start !== '' && !is_null($end) && $end !== '') {
-                        RestCorrectRequest::create([
-                            'attendance_correct_request_id' => $correctRequest->id,
+                    if (!empty($start) && !empty($end)) {
+                        $correctRequest->restCorrectRequests()->create([
                             'break_start' => $start,
                             'break_end'   => $end,
                         ]);
