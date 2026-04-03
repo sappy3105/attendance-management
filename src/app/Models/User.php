@@ -6,6 +6,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Models\Attendance;
 
 class User extends Authenticatable implements MustVerifyEmail //メール認証が必要なユーザーであると認識させる
 {
@@ -45,5 +46,11 @@ class User extends Authenticatable implements MustVerifyEmail //メール認証�
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function attendances()
+    {
+        // 「1対多」のリレーション定義
+        return $this->hasMany(Attendance::class);
     }
 }

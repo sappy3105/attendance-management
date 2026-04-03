@@ -19,7 +19,7 @@ return new class extends Migration
             // 日付（勤怠一覧や月次表示の検索に使用）
             $table->date('date');
 
-            // ステータス管理（1:勤務外, 2:出勤中, 3:休憩中, 4:退勤済）
+            // ステータス管理（1:出勤中, 2:休憩中, 3:退勤済）
             $table->tinyInteger('status')->default(1)->comment('1:出勤中, 2:休憩中, 3:退勤済');
 
             // 出勤・退勤時間（秒単位まで保持できる time 型が扱いやすいです）

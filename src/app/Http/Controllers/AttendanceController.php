@@ -15,16 +15,15 @@ use Carbon\Carbon;
 
 class AttendanceController extends Controller
 {
-    /** 勤務外 */
+    /** 勤怠画面表示(勤務外) */
     public function index()
     {
         // 今日の日付を取得
+        $user = Auth::user();
         $today = Carbon::today()->format('Y-m-d');
 
         // ログインユーザーの今日の勤怠レコードを1件取得
-        $attendance = Attendance::where('user_id', Auth::id())
-            ->where('date', $today)
-            ->first();
+        $attendance = $user->attendances()->where('date', $today)->first();
 
         return view('attendance', compact('attendance'));
     }
@@ -32,19 +31,17 @@ class AttendanceController extends Controller
     /** 出勤ボタン押下 */
     public function checkIn(Request $request)
     {
-        $userId = Auth::id();
+        $user = Auth::user();
         $today = Carbon::today()->format('Y-m-d');
-        $now = Carbon::now()->format('H:i:s');
 
         // 二重打刻防止（今日のデータが既にないか確認）
-        $exists = Attendance::where('user_id', $userId)->where('date', $today)->exists();
+        $exists = $user->attendances()->where('date', $today)->exists();
 
         if (!$exists) {
-            Attendance::create([
-                'user_id' => $userId,
+            $user->attendances()->create([
                 'date' => $today,
-                'check_in' => $now,
-                'status' => 1, // 1:出勤中
+                'check_in' => Carbon::now()->format('H:i:s'),
+                'status' => 1,
             ]);
         }
 
@@ -54,59 +51,50 @@ class AttendanceController extends Controller
     /** 休憩入ボタン押下 */
     public function breakStart(Request $request)
     {
-        $userId = Auth::id();
+        $user = Auth::user();
         $today = Carbon::today()->format('Y-m-d');
 
-        // 今日の勤怠レコードを取得
-        $attendance = Attendance::where('user_id', $userId)
-            ->where('date', $today)
-            ->first();
+        $attendance = $user->attendances()->where('date', $today)->first();
 
         if ($attendance && $attendance->status === 1) {
-            // 1. restsテーブルに開始時刻を保存
-            Rest::create([
-                'attendance_id' => $attendance->id,
-                'break_start' => Carbon::now()->format('H:i:s'),
-            ]);
+            DB::transaction(function () use ($attendance) {
+                // 1. restsテーブルに開始時刻を保存
+                $attendance->rests()->create([
+                    'break_start' => Carbon::now()->format('H:i:s'),
+                ]);
 
-            // 2. attendancesテーブルのステータスを「休憩中」に更新
-            $attendance->update([
-                'status' => 2, // 2: 休憩中
-            ]);
-        } else {
-            // 出勤中ではないのに休憩ボタンを押された場合の処理を追加すると親切です
-            return redirect()->back();
+                // 2. attendancesテーブルのステータスを「休憩中」に更新
+                $attendance->update(['status' => 2]); // 2:休憩中
+            });
         }
+        return redirect()->back();
     }
 
     /** 休憩戻ボタン押下 */
     public function breakEnd(Request $request)
     {
-        $userId = Auth::id();
+        $user = Auth::user();
         $today = Carbon::today()->format('Y-m-d');
 
-        // 今日の勤怠レコードを取得
-        $attendance = Attendance::where('user_id', $userId)
-            ->where('date', $today)
-            ->first();
+        $attendance = $user->attendances()->where('date', $today)->first();
 
-        if ($attendance) {
+        if ($attendance && $attendance->status === 2) {
             // 1. break_end が null の最新の休憩レコードを1件取得
-            $rest = Rest::where('attendance_id', $attendance->id)
+            $rest = $attendance->rests()
                 ->whereNull('break_end')
-                ->orderBy('break_start', 'desc') // 開始が一番新しいものを取得
+                ->latest('break_start') // 開始が一番新しいものを取得
                 ->first();
 
             if ($rest) {
-                // 2. 休憩終了時刻を保存
-                $rest->update([
-                    'break_end' => Carbon::now()->format('H:i:s'),
-                ]);
+                DB::transaction(function () use ($attendance, $rest) {
+                    // 2. 休憩終了時刻を保存
+                    $rest->update([
+                        'break_end' => Carbon::now()->format('H:i:s'),
+                    ]);
 
-                // 3. 勤怠ステータスを「出勤中」に戻す
-                $attendance->update([
-                    'status' => 1, // 1: 出勤中
-                ]);
+                    // 3. 勤怠ステータスを「出勤中」に戻す
+                    $attendance->update(['status' => 1]); // 1:出勤中に戻す
+                });
             }
         }
 
@@ -116,14 +104,12 @@ class AttendanceController extends Controller
     /** 退勤ボタン押下 */
     public function checkOut(Request $request)
     {
-        $userId = Auth::id();
+        $user = Auth::user();
         $today = Carbon::today()->format('Y-m-d');
 
-        $attendance = Attendance::where('user_id', $userId)
-            ->where('date', $today)
-            ->first();
+        $attendance = $user->attendances()->where('date', $today)->first();
 
-        if ($attendance) {
+        if ($attendance && $attendance->status === 1) {
             // 退勤時刻を保存し、ステータスを「4: 退勤済」に更新
             $attendance->update([
                 'check_out' => Carbon::now()->format('H:i:s'),
@@ -137,29 +123,24 @@ class AttendanceController extends Controller
     /** 勤怠一覧表示 */
     public function list(Request $request)
     {
-        // クエリパラメータから年月を取得（なければ当月）
+        // 1. クエリパラメータから年月を取得（Carbonインスタンスとして生成）
         $monthParam = $request->query('month', now()->format('Y-m'));
         $date = Carbon::parse($monthParam)->startOfMonth();
 
-        // 1ヶ月分の全日付を生成
-        $daysInMonth = $date->daysInMonth;
-        $calendar = [];
-        for ($i = 0; $i < $daysInMonth; $i++) {
-            $calendar[] = $date->copy()->addDays($i);
-        }
-
-        // DBからログインユーザーの該当月のデータを取得
-        $attendances = Attendance::with('rests')
-            ->where('user_id', Auth::id())
+        // 2. リレーションを活用してログインユーザーの該当月のデータを取得
+        $attendances = Auth::user()->attendances()
+            ->with('rests')
             ->whereYear('date', $date->year)
             ->whereMonth('date', $date->month)
             ->get()
-            ->keyBy(function ($item) {
-                // もしモデルの $casts で 'date' => 'date' となっていれば、$item->date は Carbon インスタンス
-                return ($item->date instanceof \Carbon\Carbon)
-                    ? $item->date->format('Y-m-d')
-                    : Carbon::parse($item->date)->format('Y-m-d');
-            });
+            ->keyBy(fn($item) => $item->date->format('Y-m-d'));
+
+        // 3. 1ヶ月分の全日付を生成
+        $calendar = [];
+        $daysInMonth = $date->daysInMonth;
+        for ($i = 0; $i < $daysInMonth; $i++) {
+            $calendar[] = $date->copy()->addDays($i);
+        }
 
         return view('attendance_list', [
             'calendar' => $calendar,
