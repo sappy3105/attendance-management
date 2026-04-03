@@ -39,9 +39,9 @@ class AttendanceController extends Controller
 
         if (!$exists) {
             $user->attendances()->create([
-                'date' => $today,
+                'date'     => $today,
                 'check_in' => Carbon::now()->format('H:i:s'),
-                'status' => 1,
+                'status'   => 1,
             ]);
         }
 
@@ -113,7 +113,7 @@ class AttendanceController extends Controller
             // 退勤時刻を保存し、ステータスを「4: 退勤済」に更新
             $attendance->update([
                 'check_out' => Carbon::now()->format('H:i:s'),
-                'status' => 3, // 3: 退勤済
+                'status'    => 3, // 3: 退勤済
             ]);
         }
 
@@ -143,11 +143,11 @@ class AttendanceController extends Controller
         }
 
         return view('attendance_list', [
-            'calendar' => $calendar,
-            'attendances' => $attendances,
+            'calendar'     => $calendar,
+            'attendances'  => $attendances,
             'currentMonth' => $date,
-            'prevMonth' => $date->copy()->subMonth()->format('Y-m'),
-            'nextMonth' => $date->copy()->addMonth()->format('Y-m'),
+            'prevMonth'    => $date->copy()->subMonth()->format('Y-m'),
+            'nextMonth'    => $date->copy()->addMonth()->format('Y-m'),
         ]);
     }
 
@@ -175,10 +175,6 @@ class AttendanceController extends Controller
         ];
 
         // 4. 休憩データの切り替え
-        // $rests = $isPending
-        //     ? $pendingRequest->restCorrectRequests // 申請中の休憩データ
-        //     : $attendance->rests;                   // 元の休憩データ
-
         if ($isPending) {
             $rests = $pendingRequest->restCorrectRequests; // 申請中の休憩データ
         } else {
@@ -206,7 +202,7 @@ class AttendanceController extends Controller
         // 1.元となる勤怠レコードを取得。データがなければ、「退勤済」の土台を作成
         $attendance = $user->attendances()->firstOrCreate(
             ['date' => $date],
-            ['status'    => 3] // 退勤済
+            ['status' => 3] // 退勤済
         );
 
         // 2. リレーションを使用して「承認待ち」の存在確認
@@ -261,15 +257,15 @@ class AttendanceController extends Controller
         $statusMode = $request->query('status', 'pending');
         $statusId = ($statusMode === 'approved') ? 2 : 1;
 
-        $requests = AttendanceCorrectRequest::where('user_id', $user->id)
+        $requests = $user->attendanceCorrectRequests() // Userモデルに定義したリレーションを使用
             ->where('status', $statusId)
             ->orderBy('created_at', 'desc')
             ->get();
 
         return view('attendance_request_list', [
-            'user' => $user,
+            'user'     => $user,
             'requests' => $requests,
-            'status' => $statusMode,
+            'status'   => $statusMode,
         ]);
     }
 }
