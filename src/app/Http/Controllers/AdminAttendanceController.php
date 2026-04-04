@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Http\Requests\AttendanceUpdateRequest;
 use App\Models\User;
 use App\Models\Attendance;
@@ -12,6 +11,7 @@ use App\Models\AttendanceCorrectRequest;
 use App\Models\RestCorrectRequest;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class AdminAttendanceController extends Controller
@@ -19,57 +19,74 @@ class AdminAttendanceController extends Controller
     /** 勤怠一覧画面（管理者） */
     public function list(Request $request)
     {
-        // クエリパラメータから日付を取得、なければ今日の日付
-        $dateStr = $request->query('date');
-        $currentDate = $dateStr ? Carbon::parse($dateStr) : Carbon::today();
+        // 1. クエリパラメータから日付を取得し、Carbonインスタンス化
+        $dateStr = $request->query('date', Carbon::today()->format('Y-m-d'));
+        $currentDate = Carbon::parse($dateStr);
 
-        // 前日と翌日の日付を計算
-        $prevDate = $currentDate->copy()->subDay()->format('Y-m-d');
-        $nextDate = $currentDate->copy()->addDay()->format('Y-m-d');
-
-        // 指定した日の全ユーザーの勤怠データを取得
-        // Eagerロードでユーザー情報も一緒に取得します
-        $attendances = Attendance::with(['user', 'rests'])
-            ->whereDate('date', $currentDate)
+        // 5. 全一般ユーザーを取得し、指定日の勤怠と休憩を一括取得（Eager Load）
+        $users = User::where('role', 1)
+            ->with(['attendances' => function ($query) use ($dateStr) {
+                $query->where('date', $dateStr);
+            }])
             ->get();
 
         return view('admin.attendance_list', [
-            'attendances' => $attendances,
+            'users'       => $users,
             'currentDate' => $currentDate,
-            'prevDate' => $prevDate,
-            'nextDate' => $nextDate,
+            'prevDate'    => $currentDate->copy()->subDay()->format('Y-m-d'), //前日の日付
+            'nextDate'    => $currentDate->copy()->addDay()->format('Y-m-d'), //翌日の日付
         ]);
     }
 
     /** 勤怠詳細画面（管理者） */
-    public function showDetail($id)
+    public function showDetail(Request $request, $id)
     {
-        // 1. IDから勤怠データを取得（スタッフ情報と休憩情報も一緒に）
-        $attendance = Attendance::with(['user', 'rests'])->findOrFail($id);
-        $user = $attendance->user;
+        // 1. レコードがなければ作成、あれば取得 (firstOrCreate)
+        if ($id === 'new') {
+            $attendance = Attendance::firstOrCreate(
+                [
+                    'user_id' => $request->query('user_id'),
+                    'date'    => $request->query('date'),
+                ],
+                ['status' => 3] // 退勤済みとして勤怠の枠を作成
+            );
+        } else {
+            $attendance = Attendance::with(['user', 'rests'])->findOrFail($id);
+        }
 
-        // 2. この勤怠に対して「承認待ち」の修正申請があるか確認
-        $pendingRequest = AttendanceCorrectRequest::where('attendance_id', $attendance->id)
+        // 2. 常にレコードが存在するので、findOrFailなどは不要
+        $user = $attendance->user;
+        $date = $attendance->date;
+
+        // 3. この勤怠に対して「承認待ち」の修正申請があるか確認
+        $pendingRequest = $attendance->correctRequests()
             ->where('status', 1) // 1:承認待ち
+            ->with('restCorrectRequests') // 休憩申請も一緒に取得
             ->first();
 
         // 承認待ちがあれば、その申請内容を表示データとして使う
         $isPending = !is_null($pendingRequest);
 
-        // 3. 画面に表示する値を決定（申請中なら申請データ、なければ元のデータ）
+        // 4. 画面に表示する値の取得（申請中なら申請データ、なければ元のデータ）
+        $source = $isPending ? $pendingRequest : $attendance;
         $displayData = [
-            'check_in'  => $isPending ? $pendingRequest->check_in : $attendance->check_in,
-            'check_out' => $isPending ? $pendingRequest->check_out : $attendance->check_out,
-            'remarks'   => $isPending ? $pendingRequest->remarks : $attendance->remarks,
+            'check_in'  => $source->check_in,
+            'check_out' => $source->check_out,
+            'remarks'   => $source->remarks,
         ];
 
-        // 4. 休憩データの切り替え
-        $rests = $isPending
-            ? RestCorrectRequest::where('attendance_correct_request_id', $pendingRequest->id)->get()
-            : $attendance->rests;
+        // 4. 休憩データの取得
+        $rests = $isPending ? $pendingRequest->restCorrectRequests : $attendance->rests;
 
-        // ビューに $attendance と $user の両方を渡す
-        return view('admin.attendance_detail', compact('attendance', 'user', 'isPending', 'displayData', 'rests'));
+        // 5. ビューの表示
+        return view('admin.attendance_detail', [
+            'attendance'  => $attendance,
+            'user'        => $user,
+            'date'        => $date,
+            'isPending'   => $isPending,
+            'displayData' => $displayData,
+            'rests'       => $rests,
+        ]);
     }
 
     /** スタッフ一覧画面（管理者） */
@@ -237,9 +254,9 @@ class AdminAttendanceController extends Controller
             ->where('user_id', $userId)
             ->whereBetween('date', [$startOfMonth, $endOfMonth])
             ->get()
-            ->keyBy(function($item) {
+            ->keyBy(function ($item) {
                 return $item->date->format('Y-m-d');
-        });
+            });
 
         $csvHeader = ['スタッフ名', '日付', '出勤', '退勤', '休憩時間合計', '労働時間合計', '備考'];
         $csvData = [];
@@ -264,14 +281,18 @@ class AdminAttendanceController extends Controller
                     $attendance->check_out ? $attendance->check_out->format('H:i') : '',
                     $attendance->getTotalRestTime(), //休憩時間合計
                     $attendance->getTotalWorkTime(), //労働時間合計
-                    $attendance->remarks,//備考
+                    $attendance->remarks, //備考
                 ];
             } else {
-            // データがない場合（日付と名前以外は空欄）
+                // データがない場合（日付と名前以外は空欄）
                 $csvData[] = [
                     $user->name,
                     $formattedDate,
-                    '', '', '', '', ''
+                    '',
+                    '',
+                    '',
+                    '',
+                    ''
                 ];
             }
         }
@@ -281,7 +302,7 @@ class AdminAttendanceController extends Controller
         // 3. ファイル書き出し処理
         $callback = function () use ($csvData) {
             $file = fopen('php://output', 'w');
-            fputs($file, "\xEF\xBB\xBF");// 文字化け対策(BOM)
+            fputs($file, "\xEF\xBB\xBF"); // 文字化け対策(BOM)
 
             // 2. データを1行ずつ取り出して書き込む
             foreach ($csvData as $row) {
@@ -293,8 +314,8 @@ class AdminAttendanceController extends Controller
 
         // 4. レスポンスヘッダーの設定
         $headers = [
-            "Content-type" => "text/csv",//CSVデータという宣言
-            "Content-Disposition" => "attachment; filename=$filename",//画面に表示せず、「添付ファイル（attachment）」として扱い、この「ファイル名（filename）」で保存してください、という指示
+            "Content-type" => "text/csv", //CSVデータという宣言
+            "Content-Disposition" => "attachment; filename=$filename", //画面に表示せず、「添付ファイル（attachment）」として扱い、この「ファイル名（filename）」で保存してください、という指示
         ];
         return response()->stream($callback, 200, $headers);
     }

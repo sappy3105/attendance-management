@@ -41,7 +41,7 @@ Route::middleware('auth', 'verified')->group(function () {
     Route::get('/attendance/list', [AttendanceController::class, 'list'])->name('attendance.list');
 
     // 勤怠詳細画面表示
-    Route::get('/attendance/{date}', [AttendanceController::class, 'showDetail'])
+    Route::get('/attendance/detail/{id}', [AttendanceController::class, 'showDetail'])
         ->name('attendance.detail');
 
     // 勤怠詳細の更新（修正申請）

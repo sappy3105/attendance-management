@@ -53,10 +53,7 @@ class Attendance extends Model
         $totalMinutes = 0; // 1. 合計分を保持する変数を0で初期化
         foreach ($this->rests ?? collect() as $rest) { // 2. この勤怠に紐づく休憩レコードを1つずつ取り出す。し休憩データが空っぽ（null）なら、空の箱（空のコレクション）を用意する
             if ($rest->break_start && $rest->break_end) { // 3. 開始と終了の両方の時刻がある場合のみ計算する
-                // キャストをH:iにしている場合、Carbon::parseが必要
-                $start = Carbon::parse($rest->break_start); // 4. 文字列の開始時刻をCarbonオブジェクトに変換
-                $end = Carbon::parse($rest->break_end); // 5. 文字列の終了時刻をCarbonオブジェクトに変換
-                $totalMinutes += $start->diffInMinutes($end); // 6. 開始と終了の差（分）を計算して合計に足す
+                $totalMinutes += $rest->break_start->diffInMinutes($rest->break_end); // 4. 開始と終了の差（分）を計算して合計に足す
             }
         }
         return $totalMinutes; // 7. 全ての休憩を足し合わせた合計分を返す

@@ -152,46 +152,50 @@ class AttendanceController extends Controller
     }
 
     /** 勤怠詳細画面の表示 */
-    public function showDetail($date)
+    public function showDetail(Request $request, $id)
     {
         $user = Auth::user(); // 現在のログインユーザー
 
-        // 1. 元の勤怠データを取得
-        $attendance = $user->attendances()
-            ->whereDate('date', $date)
-            ->with('rests')
-            ->first();
-
-        // 2. この勤怠に対して「承認待ち」の修正申請があるか確認
-        $pendingRequest = $attendance?->correctRequests()->where('status', 1)->first();
-
-        $isPending = !is_null($pendingRequest);
-
-        // 3. 画面に表示する値を決定（申請中なら申請データ、なければ元のデータ）
-        $displayData = [
-            'check_in'  => $isPending ? $pendingRequest->check_in : ($attendance?->check_in),
-            'check_out' => $isPending ? $pendingRequest->check_out : ($attendance?->check_out),
-            'remarks'   => $isPending ? $pendingRequest->remarks : ($attendance?->remarks),
-        ];
-
-        // 4. 休憩データの切り替え
-        if ($isPending) {
-            $rests = $pendingRequest->restCorrectRequests; // 申請中の休憩データ
+        // 1. IDがnew（レコード未作成）の場合は、日付からレコードを作成して取得
+        if ($id == 'new') {
+            $date = $request->query('date');
+            $attendance = Attendance::firstOrCreate(
+                ['user_id' => $user->id, 'date' => $date],
+                ['status' => 3] // 一般ユーザーも、未打刻の過去日は「退勤済み（勤務終了）」扱いで枠を作る
+            );
         } else {
-            $rests = $attendance ? $attendance->rests : collect(); // 元の休憩データ
+            // 2. IDがある場合は通常取得（他人のデータを見れないようuser_idでガード）
+            $attendance = Attendance::where('user_id', $user->id)->findOrFail($id);
         }
 
+        // 3. この勤怠に対して「承認待ち」の修正申請があるか確認
+        $pendingRequest = $attendance->correctRequests()
+            ->where('status', 1) // 1:承認待ち
+            ->with('restCorrectRequests') // 休憩申請も一緒に取得
+            ->first();
 
-        $date = Carbon::parse($date); // ここで日付をCarbon化しておく
+        // 承認待ちがあれば、その申請内容を表示データとして使う
+        $isPending = !is_null($pendingRequest);
 
-        return view('attendance_detail', compact(
-            'attendance',
-            'user',
-            'isPending',
-            'displayData',
-            'rests',
-            'date' // $attendanceがnullでもこれがあれば日付が表示できる
-        ));
+        // 4. 画面に表示する値を決定（申請中なら申請データ、なければ元のデータ）
+        $source = $isPending ? $pendingRequest : $attendance;
+        $displayData = [
+            'check_in'  => $source->check_in,
+            'check_out' => $source->check_out,
+            'remarks'   => $source->remarks,
+        ];
+
+        // 5. 休憩データの取得
+        $rests = $isPending ? $pendingRequest->restCorrectRequests : $attendance->rests;
+
+        // 6. ビューの表示
+        return view('attendance_detail', [
+            'attendance'  => $attendance,
+            'user'        => $user,
+            'isPending'   => $isPending,
+            'displayData' => $displayData,
+            'rests'       => $rests,
+        ]);
     }
 
     /** 勤怠詳細の修正依頼 */

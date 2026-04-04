@@ -73,40 +73,30 @@
                     </td>
                 </tr>
 
-                {{-- 休憩欄：データがある分だけ表示。なければ1つ空欄を表示 --}}
-                {{-- @php
-                    if ($isPending) {
-                        // 承認待ちのときは、現在登録（申請）されているデータのみを表示
-                        $displayRests = $rests;
-                    } else {
-                        // 通常時は、既存データに空欄を1つ追加して表示
-                        $displayRests = $rests->concat([null]);
-                    }
-                @endphp --}}
-
                 {{-- concatで配列の末尾に要素を１つ追加 --}}
-                @foreach (($isPending ? $rests : $rests->concat([null])) as $index => $rest)
+                {{-- @foreach ($isPending ? $rests : $rests->concat([null]) as $index => $rest) --}}
+                {{-- @foreach ($rests as $index => $rest) --}}
+                @foreach ($rests as $rest)
                     <tr class="attendance-detail__row">
                         <th class="attendance-detail__label">休憩{{ $index > 0 ? $index + 1 : '' }}</th>
                         <td class="attendance-detail__value">
                             @if ($isPending)
+                                {{-- 承認待ち：テキスト表示 --}}
                                 <div class="attendance-detail__time-group">
-                                    <span class="attendance-detail__text-time">
-                                        {{ optional($rest->break_start)->format('H:i') }}
-                                    </span>
+                                    <span
+                                        class="attendance-detail__text-time">{{ $rest->break_start?->format('H:i') }}</span>
                                     <span class="attendance-detail__separator">〜</span>
-                                    <span class="attendance-detail__text-time">
-                                        {{ optional($rest->break_end)->format('H:i') }}
-                                    </span>
+                                    <span
+                                        class="attendance-detail__text-time">{{ $rest->break_end?->format('H:i') }}</span>
                                 </div>
                             @else
                                 <div class="attendance-detail__time-group">
                                     <div class="attendance-detail__time-inputs">
                                         <input type="time" name="break_start[]" class="attendance-detail__input"
-                                            value="{{ old("break_start.$index", $rest ? optional($rest->break_start)->format('H:i') : '') }}">
+                                            value="{{ old("break_start.$index", $rest?->break_start?->format('H:i')) }}">
                                         <span class="attendance-detail__separator">〜</span>
                                         <input type="time" name="break_end[]" class="attendance-detail__input"
-                                            value="{{ old("break_end.$index", $rest ? optional($rest->break_end)->format('H:i') : '') }}">
+                                            value="{{ old("break_end.$index", $rest?->break_end?->format('H:i')) }}">
                                     </div>
                                     <div class="attendance-detail__error-message">
                                         @error("break_start.$index")
@@ -121,6 +111,25 @@
                         </td>
                     </tr>
                 @endforeach
+
+                {{-- 申請中でなければ、追加用の空欄を1行表示する --}}
+                @if (!$isPending)
+                    @php $nextIndex = count($rests); @endphp
+                    <tr class="attendance-detail__row">
+                        <th class="attendance-detail__label">休憩{{ $nextIndex + 1 }}</th>
+                        <td class="attendance-detail__value">
+                            <div class="attendance-detail__item-group">
+                                <div class="attendance-detail__time-inputs">
+                                    <input type="time" name="break_start[]" class="attendance-detail__input"
+                                        value="{{ old("break_start.$nextIndex") }}">
+                                    <span class="attendance-detail__separator">〜</span>
+                                    <input type="time" name="break_end[]" class="attendance-detail__input"
+                                        value="{{ old("break_end.$nextIndex") }}">
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                @endif
 
                 <tr class="attendance-detail__row">
                     <th class="attendance-detail__label">備考</th>
@@ -141,8 +150,6 @@
                                         <div class="error-item">{{ $message }}</div>
                                     @enderror
                                 </div>
-
-
                             </div>
                         @endif
                     </td>
@@ -158,7 +165,6 @@
                     <button type="submit" class="attendance-detail__submit-button">修正</button>
                 @endif
             </div>
-
         </form>
     </div>
 @endsection

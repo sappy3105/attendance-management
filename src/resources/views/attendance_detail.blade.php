@@ -10,8 +10,7 @@
                 {{ session('success') }}
             </div>
         @endif
-        <form action="{{ route('attendance.update', ($attendance ? $attendance->date : $date)->format('Y-m-d')) }}"
-            method="POST" class="attendance-detail__form">
+        <form action="{{ route('attendance.update', $attendance->id) }}" method="POST" class="attendance-detail__form">
             @csrf
             <table class="attendance-detail__table">
                 <tr class="attendance-detail__row">
@@ -26,11 +25,11 @@
                         <div class="attendance-detail__date-container">
                             {{-- 年と月日を分けて配置 --}}
                             <span class="attendance-detail__date-year">
-                                {{ ($attendance ? $attendance->date : $date)->format('Y年') }}
+                                {{ $attendance->date->format('Y年') }}
                             </span>
                             <span class="attendance-detail__date-separator"></span> {{-- 空白を作るための要素 --}}
                             <span class="attendance-detail__date-month">
-                                {{ ($attendance ? $attendance->date : $date)->isoFormat('M月D日') }}
+                                {{ $attendance->date->isoFormat('M月D日') }}
                             </span>
                         </div>
                     </td>
@@ -147,8 +146,6 @@
                                         <div class="error-item">{{ $message }}</div>
                                     @enderror
                                 </div>
-
-
                             </div>
                         @endif
                     </td>
@@ -164,7 +161,6 @@
                     <button type="submit" class="attendance-detail__submit-button">修正</button>
                 @endif
             </div>
-
         </form>
     </div>
 @endsection

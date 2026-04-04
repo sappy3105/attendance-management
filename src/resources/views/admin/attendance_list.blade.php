@@ -34,21 +34,27 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach ($attendances as $attendance)
+                @foreach ($users as $user)
+                    @php
+                        // そのユーザーの、その日の勤怠を取り出す
+                        $attendance = $user->attendances->first();
+                    @endphp
+
                     <tr>
-                        <td>{{ $attendance->user->name }}</td>
-                        <td>{{ $attendance->check_in ? \Carbon\Carbon::parse($attendance->check_in)->format('H:i') : '' }}
-                        </td>
-                        <td>{{ $attendance->check_out ? \Carbon\Carbon::parse($attendance->check_out)->format('H:i') : '' }}
-                        </td>
-                        <td>{{ $attendance->getTotalRestTime() }}</td>{{-- 休憩合計 --}}
-                        <td>{{ $attendance->getTotalWorkTime() }}</td>{{-- 勤務合計 --}}
+                        <td>{{ $user->name }}</td>
+                        <td>{{ $attendance?->check_in ? $attendance->check_in->format('H:i') : '' }}</td>
+                        <td>{{ $attendance?->check_out ? $attendance->check_out->format('H:i') : '' }}</td>
+                        <td>{{ $attendance ? $attendance->getTotalRestTime() : '' }}</td>{{-- 休憩合計 --}}
+                        <td>{{ $attendance ? $attendance->getTotalWorkTime() : '' }}</td>{{-- 勤務合計 --}}
                         <td>
-                            {{-- 要件：詳細画面へ遷移 --}}
-                            <a href="{{ route('admin.attendance.detail', ['id' => $attendance->id]) }}"
-                                class="attendance-table__detail-link">
-                                詳細
-                            </a>
+                            @if ($attendance)
+                                <a href="{{ route('admin.attendance.detail', ['id' => $attendance->id]) }}"
+                                    class="attendance-table__detail-link">詳細</a>
+                            @else
+                                {{-- IDがないので 'new' を渡し、誰のいつの分かを追加で送る --}}
+                                <a href="{{ route('admin.attendance.detail', ['id' => 'new', 'user_id' => $user->id, 'date' => $currentDate->format('Y-m-d')]) }}"
+                                    class="attendance-table__detail-link">詳細</a>
+                            @endif
                         </td>
                     </tr>
                 @endforeach
