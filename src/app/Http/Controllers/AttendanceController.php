@@ -199,15 +199,13 @@ class AttendanceController extends Controller
     }
 
     /** 勤怠詳細の修正依頼 */
-    public function updateDetail(AttendanceUpdateRequest $request, $date)
+    public function updateDetail(AttendanceUpdateRequest $request, $id)
     {
         $user = Auth::user();
 
-        // 1.元となる勤怠レコードを取得。データがなければ、「退勤済」の土台を作成
-        $attendance = $user->attendances()->firstOrCreate(
-            ['date' => $date],
-            ['status' => 3] // 退勤済
-        );
+        // 1.元となる勤怠レコードを取得
+        $attendance = $user->attendances()->findOrFail($id);
+        $date = $attendance->date->format('Y-m-d');
 
         // 2. リレーションを使用して「承認待ち」の存在確認
         $existsPending = $attendance->correctRequests()
@@ -248,7 +246,7 @@ class AttendanceController extends Controller
             }
         });
 
-        return redirect()->route('attendance.detail', ['date' => $date])
+        return redirect()->route('attendance.detail', ['id' => $attendance->id])
             ->with('success', '勤怠データの修正申請をしました');
     }
 
@@ -262,6 +260,7 @@ class AttendanceController extends Controller
         $statusId = ($statusMode === 'approved') ? 2 : 1;
 
         $requests = $user->attendanceCorrectRequests() // Userモデルに定義したリレーションを使用
+            ->with('attendance')
             ->where('status', $statusId)
             ->orderBy('created_at', 'desc')
             ->get();

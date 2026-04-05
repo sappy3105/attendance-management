@@ -62,14 +62,16 @@
                         </td>
 
                         <td>
-                            @if ($attendance)
-                                {{-- レコードがある場合はそのIDを渡す --}}
-                                <a href="{{ route('attendance.detail', ['id' => $attendance->id]) }}"
-                                    class="attendance-table__detail-link">詳細</a>
-                            @else
-                                {{-- レコードがない場合は ID=new と日付を渡す --}}
-                                <a href="{{ route('attendance.detail', ['id' => 'new', 'date' => $day->format('Y-m-d')]) }}"
-                                    class="attendance-table__detail-link">詳細</a>
+                            @if ($day->isPast() || $day->isToday())
+                                @if ($attendance)
+                                    {{-- レコードがある場合はそのIDを渡す --}}
+                                    <a href="{{ route('attendance.detail', ['id' => $attendance->id]) }}"
+                                        class="attendance-table__detail-link">詳細</a>
+                                @else
+                                    {{-- レコードがない場合は ID=new と日付を渡す --}}
+                                    <a href="{{ route('attendance.detail', ['id' => 'new', 'date' => $day->format('Y-m-d')]) }}"
+                                        class="attendance-table__detail-link">詳細</a>
+                                @endif
                             @endif
                         </td>
                     </tr>

@@ -36,7 +36,6 @@ class AttendanceCorrectRequest extends Model
         return $this->belongsTo(User::class);
     }
 
-    //いらないかもしれない
     public function attendance()
     {
         return $this->belongsTo(Attendance::class);

@@ -71,34 +71,41 @@
                     </td>
                 </tr>
 
-                @foreach ($rests as $index => $rest)
+                @foreach ($rests as $rest)
                     <tr class="attendance-detail__row">
-                        <th class="attendance-detail__label">休憩{{ $index > 0 ? $index + 1 : '' }}</th>
+                        <th class="attendance-detail__label">
+                            {{-- 1回目は「休憩」、2回目以降は「休憩2」「休憩3」... --}}
+                            休憩{{ $loop->iteration > 1 ? $loop->iteration : '' }}
+                        </th>
                         <td class="attendance-detail__value">
                             @if ($isPending)
                                 {{-- 承認待ち：テキスト表示 --}}
                                 <div class="attendance-detail__time-group">
-                                    <span
-                                        class="attendance-detail__text-time">{{ $rest->break_start?->format('H:i') }}</span>
+                                    <span class="attendance-detail__text-time">
+                                        {{ optional($rest->break_start)->format('H:i') }}
+                                    </span>
                                     <span class="attendance-detail__separator">〜</span>
-                                    <span
-                                        class="attendance-detail__text-time">{{ $rest->break_end?->format('H:i') }}</span>
+                                    <span class="attendance-detail__text-time">
+                                        {{ optional($rest->break_end)->format('H:i') }}
+                                    </span>
                                 </div>
                             @else
                                 <div class="attendance-detail__item-group">
                                     {{-- 通常時：入力フォーム --}}
                                     <div class="attendance-detail__time-inputs">
-                                        <input type="time" name="break_start[]" class="attendance-detail__input"
-                                            value="{{ old("break_start.$index", $rest?->break_start?->format('H:i')) }}">
+                                        <input type="time" name="break_start[{{ $loop->index }}]"
+                                            class="attendance-detail__input"
+                                            value="{{ old("break_start.{$loop->index}", optional($rest->break_start)->format('H:i')) }}">
                                         <span class="attendance-detail__separator">〜</span>
-                                        <input type="time" name="break_end[]" class="attendance-detail__input"
-                                            value="{{ old("break_end.$index", $rest?->break_end?->format('H:i')) }}">
+                                        <input type="time" name="break_end[{{ $loop->index }}]"
+                                            class="attendance-detail__input"
+                                            value="{{ old("break_end.{$loop->index}", optional($rest->break_end)->format('H:i')) }}">
                                     </div>
                                     <div class="attendance-detail__error-message">
-                                        @error("break_start.$index")
+                                        @error("break_start.{$loop->index}")
                                             <div class="error-item">{{ $message }}</div>
                                         @enderror
-                                        @error("break_end.$index")
+                                        @error("break_end.{$loop->index}")
                                             <div class="error-item">{{ $message }}</div>
                                         @enderror
                                     </div>
@@ -112,7 +119,9 @@
                 @if (!$isPending)
                     @php $nextIndex = count($rests); @endphp
                     <tr class="attendance-detail__row">
-                        <th class="attendance-detail__label">休憩{{ $nextIndex + 1 }}</th>
+                        <th class="attendance-detail__label">
+                            休憩{{ $nextIndex > 0 ? $nextIndex + 1 : '' }}
+                        </th>
                         <td class="attendance-detail__value">
                             <div class="attendance-detail__item-group">
                                 <div class="attendance-detail__time-inputs">

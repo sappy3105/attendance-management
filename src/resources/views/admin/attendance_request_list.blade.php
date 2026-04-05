@@ -31,9 +31,9 @@
                         </td>
                         <td class="request-list__value">{{ $request->user->name }}</td>
                         <td class="request-list__value">
-                            {{ \Carbon\Carbon::parse($request->date)->format('Y/m/d') }}
+                            {{ $request->date->format('Y/m/d') }}
                         </td>
-                        <td class="request-list__value">{{ $request->remarks }}</td>
+                        <td class="request-list__value">{!! nl2br(e($request->remarks)) !!}</td>
                         <td class="request-list__value">
                             {{ $request->created_at->format('Y/m/d') }}
                         </td>

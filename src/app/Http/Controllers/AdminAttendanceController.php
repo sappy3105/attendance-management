@@ -50,8 +50,10 @@ class AdminAttendanceController extends Controller
                 ],
                 ['status' => 3] // 退勤済みとして勤怠の枠を作成
             );
+            $attendance->load('user');
         } else {
-            $attendance = Attendance::with(['user', 'rests'])->findOrFail($id);
+            // $attendance = Attendance::with(['user', 'rests'])->findOrFail($id);
+            $attendance = Attendance::with(['user', 'rests', 'correctRequests.restCorrectRequests'])->findOrFail($id);
         }
 
         // 2. 常にレコードが存在するので、findOrFailなどは不要
@@ -61,7 +63,7 @@ class AdminAttendanceController extends Controller
         // 3. この勤怠に対して「承認待ち」の修正申請があるか確認
         $pendingRequest = $attendance->correctRequests()
             ->where('status', 1) // 1:承認待ち
-            ->with('restCorrectRequests') // 休憩申請も一緒に取得
+            // ->with('restCorrectRequests') // 休憩申請も一緒に取得
             ->first();
 
         // 承認待ちがあれば、その申請内容を表示データとして使う
@@ -93,7 +95,10 @@ class AdminAttendanceController extends Controller
     public function staffList()
     {
         // roleが1（一般スタッフ）のユーザーのみ取得
-        $users = User::where('role', 1)->get();
+        $users = User::where('role', 1)
+            ->orderBy('id', 'asc')
+            ->get();
+
 
         return view('admin.staff_list', compact('users'));
     }
@@ -101,26 +106,26 @@ class AdminAttendanceController extends Controller
     /** スタッフ別勤怠一覧画面  */
     public function staffAttendance(Request $request, $id)
     {
-        $user = User::findOrFail($id);
-
-        // 表示月の判定（クエリパラメータ month がなければ今月）
+        // 1. ユーザー取得と同時に、対象月の勤怠データを一括取得
         $monthStr = $request->query('month');
         $currentMonth = $monthStr ? Carbon::parse($monthStr)->startOfMonth() : Carbon::today()->startOfMonth();
+
+        $user = User::with(['attendances' => function ($query) use ($currentMonth) {
+            $query->with('rests')
+                ->whereYear('date', $currentMonth->year)
+                ->whereMonth('date', $currentMonth->month);
+        }])->findOrFail($id);
+
+        // 2. Bladeで扱いやすいよう、日付をキーにしたコレクションにする
+        $attendances = $user->attendances->keyBy(function ($item) {
+            return $item->date->format('Y-m-d');
+        });
 
         // 前月・翌月の計算
         $prevMonth = $currentMonth->copy()->subMonth()->format('Y-m');
         $nextMonth = $currentMonth->copy()->addMonth()->format('Y-m');
 
-        // 指定スタッフの対象月の勤怠データを取得
-        $attendances = Attendance::with('rests')
-            ->where('user_id', $id)
-            ->whereBetween('date', [$currentMonth->copy()->startOfMonth(), $currentMonth->copy()->endOfMonth()])
-            ->get()
-            ->keyBy(function ($item) {
-                return $item->date->format('Y-m-d');
-            });
-
-        // カレンダー作成（1日〜月末まで）
+        // 3. カレンダー作成（1日〜月末まで）
         $calendar = [];
         $daysInMonth = $currentMonth->daysInMonth;
         for ($i = 0; $i < $daysInMonth; $i++) {
@@ -128,19 +133,19 @@ class AdminAttendanceController extends Controller
         }
 
         return view('admin.staff_attendance_list', [
-            'user' => $user,
-            'calendar' => $calendar,
-            'attendances' => $attendances,
+            'user'         => $user,
+            'calendar'     => $calendar,
+            'attendances'  => $attendances,
             'currentMonth' => $currentMonth,
-            'prevMonth' => $prevMonth,
-            'nextMonth' => $nextMonth,
+            'prevMonth'    => $prevMonth,
+            'nextMonth'    => $nextMonth,
         ]);
     }
 
     /** 勤怠詳細の修正 (管理者用) */
     public function updateDetail(AttendanceUpdateRequest $request, $id)
     {
-        $attendance = Attendance::findOrFail($id);
+        $attendance = Attendance::with('rests')->findOrFail($id);
 
         DB::transaction(function () use ($request, $attendance) {
             // 1. attendancesテーブルの直接更新
@@ -159,7 +164,7 @@ class AdminAttendanceController extends Controller
                     $end = $request->break_end[$index] ?? null;
 
                     // 開始・終了の両方が入力されている場合のみ保存
-                    if (!is_null($start) && $start !== '' && !is_null($end) && $end !== '') {
+                    if (!empty($start) && !empty($end)) {
                         $attendance->rests()->create([
                             'break_start' => $start,
                             'break_end'   => $end,
@@ -198,19 +203,18 @@ class AdminAttendanceController extends Controller
         $correctRequest = AttendanceCorrectRequest::with(['user', 'restCorrectRequests'])
             ->findOrFail($attendance_correct_request_id);
 
-        return view('admin.attendance_approve', [
-            'correctRequest' => $correctRequest,
-            'user' => $correctRequest->user,
-        ]);
+        return view('admin.attendance_approve', compact('correctRequest'));
     }
 
     /** 承認処理の実行 */
     public function approve($attendance_correct_request_id)
     {
-        $correctRequest = AttendanceCorrectRequest::findOrFail($attendance_correct_request_id);
+        // 1. 申請データを取得（リレーションで勤怠本体と休憩申請も一括取得）
+        $correctRequest = AttendanceCorrectRequest::with(['restCorrectRequests'])
+            ->findOrFail($attendance_correct_request_id);
 
         DB::transaction(function () use ($correctRequest) {
-            // 1. 本番の勤怠レコード(attendances)を更新
+            // 2. 本番の勤怠レコード(attendances)を更新
             $attendance = Attendance::findOrFail($correctRequest->attendance_id);
             $attendance->update([
                 'check_in'  => $correctRequest->check_in,
@@ -218,22 +222,21 @@ class AdminAttendanceController extends Controller
                 'remarks'   => $correctRequest->remarks,
             ]);
 
-            // 2. 本番の休憩レコード(rests)を更新
+            // 3. 本番の休憩レコード(rests)を更新
             // 一度削除して、申請された内容で作り直すのが確実です
-            Rest::where('attendance_id', $attendance->id)->delete();
+            $attendance->rests()->delete();
             foreach ($correctRequest->restCorrectRequests as $restRequest) {
-                Rest::create([
-                    'attendance_id' => $attendance->id,
-                    'break_start'   => $restRequest->break_start,
-                    'break_end'     => $restRequest->break_end,
+                $attendance->rests()->create([
+                    'break_start' => $restRequest->break_start,
+                    'break_end'   => $restRequest->break_end,
                 ]);
             }
 
-            // 3. 申請ステータスを「承認済み(2)」に変更
+            // 4. 申請ステータスを「承認済み(2)」に変更
             $correctRequest->update(['status' => 2]);
         });
 
-        return redirect()->back()->with('message', '承認しました');
+        return redirect()->back();
     }
 
 

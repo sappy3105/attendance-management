@@ -35,15 +35,20 @@
                     @php $attendance = $attendances->get($day->format('Y-m-d')); @endphp
                     <tr>
                         <td>{{ $day->isoFormat('MM/DD(ddd)') }}</td>
-                        <td>{{ $attendance ? \Carbon\Carbon::parse($attendance->check_in)->format('H:i') : '' }}</td>
-                        <td>{{ $attendance ? \Carbon\Carbon::parse($attendance->check_out)->format('H:i') : '' }}</td>
+                        <td>{{ $attendance?->check_in?->format('H:i') ?? '' }}</td>
+                        <td>{{ $attendance?->check_out?->format('H:i') ?? '' }}</td>
                         <td>{{ $attendance ? $attendance->getTotalRestTime() : '' }}</td>
                         <td>{{ $attendance ? $attendance->getTotalWorkTime() : '' }}</td>
                         <td>
-                            @if ($attendance)
-                                {{-- 管理者用の詳細画面へ遷移 --}}
-                                <a href="{{ route('admin.attendance.detail', ['id' => $attendance->id]) }}"
-                                    class="attendance-table__detail-link">詳細</a>
+                            @if ($day->isPast() || $day->isToday())
+                                @if ($attendance)
+                                    <a href="{{ route('admin.attendance.detail', ['id' => $attendance->id]) }}"
+                                        class="attendance-table__detail-link">詳細</a>
+                                @else
+                                    {{-- レコードがない場合も管理者が作成できるように 'new' を渡す --}}
+                                    <a href="{{ route('admin.attendance.detail', ['id' => 'new', 'user_id' => $user->id, 'date' => $day->format('Y-m-d')]) }}"
+                                        class="attendance-table__detail-link">詳細</a>
+                                @endif
                             @endif
                         </td>
                     </tr>
@@ -52,8 +57,9 @@
         </table>
         <div class="attendance-list__actions">
             {{-- 通常時：修正ボタンを表示 --}}
-            <a href="{{ route('admin.export', ['id' => $user->id, 'month' => $currentMonth->format('Y-m')]) }}" class="attendance-list__export-link">
-            CSV出力
+            <a href="{{ route('admin.export', ['id' => $user->id, 'month' => $currentMonth->format('Y-m')]) }}"
+                class="attendance-list__export-link">
+                CSV出力
             </a>
         </div>
     </div>

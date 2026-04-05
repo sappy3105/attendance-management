@@ -45,7 +45,7 @@ Route::middleware('auth', 'verified')->group(function () {
         ->name('attendance.detail');
 
     // 勤怠詳細の更新（修正申請）
-    Route::post('/attendance/{date}', [AttendanceController::class, 'updateDetail'])
+    Route::post('/attendance/detail/{id}', [AttendanceController::class, 'updateDetail'])
         ->name('attendance.update');
 
     // 申請一覧画面表示

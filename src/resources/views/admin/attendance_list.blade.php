@@ -47,13 +47,15 @@
                         <td>{{ $attendance ? $attendance->getTotalRestTime() : '' }}</td>{{-- 休憩合計 --}}
                         <td>{{ $attendance ? $attendance->getTotalWorkTime() : '' }}</td>{{-- 勤務合計 --}}
                         <td>
-                            @if ($attendance)
-                                <a href="{{ route('admin.attendance.detail', ['id' => $attendance->id]) }}"
-                                    class="attendance-table__detail-link">詳細</a>
-                            @else
-                                {{-- IDがないので 'new' を渡し、誰のいつの分かを追加で送る --}}
-                                <a href="{{ route('admin.attendance.detail', ['id' => 'new', 'user_id' => $user->id, 'date' => $currentDate->format('Y-m-d')]) }}"
-                                    class="attendance-table__detail-link">詳細</a>
+                            @if ($currentDate->isPast() || $currentDate->isToday())
+                                @if ($attendance)
+                                    <a href="{{ route('admin.attendance.detail', ['id' => $attendance->id]) }}"
+                                        class="attendance-table__detail-link">詳細</a>
+                                @else
+                                    {{-- IDがないので 'new' を渡し、誰のいつの分かを追加で送る --}}
+                                    <a href="{{ route('admin.attendance.detail', ['id' => 'new', 'user_id' => $user->id, 'date' => $currentDate->format('Y-m-d')]) }}"
+                                        class="attendance-table__detail-link">詳細</a>
+                                @endif
                             @endif
                         </td>
                     </tr>
