@@ -1,13 +1,31 @@
-/* 日付選択のinputをカレンダー形式で使いやすく調整 */
-.hidden-month-input[type="date"] {
-    position: absolute;
-    opacity: 0;
-    width: 100%;
-    height: 100%;
+/* スタッフ別勤怠一覧 */
+/* 日付選択 */
+/* 年月選択カレンダー */
+.date-picker {
+    position: relative;
+    display: flex;
+    align-items: center;
     cursor: pointer;
-    pointer-events: auto;
-    /* クリックできるように修正 */
+    /* padding: 5px 10px; */
 }
+
+.hidden-date-input {
+    position: absolute;
+    width: 1px;
+    /* 完全に消すと動作しないブラウザがあるため、1pxだけ残して透明にする */
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.date-display {
+    display: flex;
+    align-items: center;
+    font-size: 18px;
+    font-weight: bold;
+    pointer-events: none;
+}
+
 
 /* テーブル内の「詳細」文字を要件通り太字に */
 .attendance-table__detail-link {

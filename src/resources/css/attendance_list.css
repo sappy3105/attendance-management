@@ -20,6 +20,8 @@
     padding: 15px;
     border-radius: 10px;
     margin-bottom: 50px;
+    position: relative;
+    z-index: 20;
 }
 
 /* ページネーション */
@@ -31,36 +33,35 @@
     text-decoration: none;
 }
 
-/* カレンダーアイコン */
+/* 年月選択カレンダー */
 .month-picker {
     position: relative;
     display: flex;
     align-items: center;
+    cursor: pointer;
+    /* padding: 5px 10px; */
 }
 
 .hidden-month-input {
     position: absolute;
-    width: 0;
-    height: 0;
+    width: 1px;/* 完全に消すと動作しないブラウザがあるため、1pxだけ残して透明にする */
+    height: 1px;
     opacity: 0;
     pointer-events: none;
 }
 
 .month-display {
-    cursor: pointer;
-    font-size: 18px;
-    font-weight: bold;
     display: flex;
     align-items: center;
-    padding: 5px 10px;
+    font-size: 18px;
+    font-weight: bold;
+    pointer-events: none;
 }
 
 .calendar-trigger-icon{
     width: 24px;
     height: 24px;
-    vertical-align: middle;
     margin-right: 8px;
-    pointer-events: none;
 }
 
 /* テーブル */

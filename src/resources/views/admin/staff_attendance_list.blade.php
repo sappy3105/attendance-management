@@ -12,6 +12,7 @@
                 <input type="month" id="month-input" class="hidden-month-input" value="{{ $currentMonth->format('Y-m') }}"
                     onchange="location.href='/admin/attendance/staff/{{ $user->id }}?month='+this.value">
                 <label for="month-input" class="month-display">
+                    <img src="{{ asset('images/calendar_icon.svg') }}" alt="カレンダー" class="calendar-trigger-icon">
                     {{ $currentMonth->format('Y/m') }}
                 </label>
             </div>

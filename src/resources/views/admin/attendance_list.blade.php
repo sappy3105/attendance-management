@@ -9,10 +9,10 @@
         <div class="attendance-list__nav">
             <a href="{{ url('/admin/attendance/list?date=' . $prevDate) }}" class="nav-button">← 前日</a>
 
-            <div class="month-picker">
-                <input type="date" id="date-input" class="hidden-month-input" value="{{ $currentDate->format('Y-m-d') }}"
+            <div class="date-picker" onclick="document.getElementById('date-input').showPicker();">
+                <input type="date" id="date-input" class="hidden-date-input" value="{{ $currentDate->format('Y-m-d') }}"
                     onchange="location.href='/admin/attendance/list?date='+this.value">
-                <label for="date-input" class="month-display">
+                <label class="date-display">
                     <img src="{{ asset('images/calendar_icon.svg') }}" alt="カレンダー" class="calendar-trigger-icon">
                     {{ $currentDate->format('Y/m/d') }}
                 </label>

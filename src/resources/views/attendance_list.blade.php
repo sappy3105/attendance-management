@@ -8,10 +8,10 @@
         <div class="attendance-list__nav">
             <a href="{{ url('/attendance/list?month=' . $prevMonth) }}" class="nav-button">← 前月</a>
 
-            <div class="month-picker">
+            <div class="month-picker" onclick="document.getElementById('month-input').showPicker();">
                 <input type="month" id="month-input" class="hidden-month-input" value="{{ $currentMonth->format('Y-m') }}"
                     onchange="location.href='/attendance/list?month='+this.value">
-                <label for="month-input" class="month-display">
+                <label class="month-display">
                     <img src="{{ asset('images/calendar_icon.svg') }}" alt="カレンダー" class="calendar-trigger-icon">
                     {{ $currentMonth->format('Y/m') }}
                 </label>

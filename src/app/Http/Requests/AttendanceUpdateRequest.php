@@ -23,11 +23,13 @@ class AttendanceUpdateRequest extends FormRequest
     public function rules(): array //単独の項目のチェック
     {
         return [
-            'check_in'    => ['required'], // 出勤時間は必須
-            'check_out'   => ['required'], // 退勤時間は必須
-            'break_start' => ['required', 'array'], // 休憩開始は（複数ある可能性有りのため）配列形式
-            'break_end'   => ['array'], // 休憩終了は（複数ある可能性有りのため）配列形式
-            'remarks'     => ['required'], // 備考は必須
+            'check_in'      => ['required', 'date_format:H:i'], // 出勤時間は必須
+            'check_out'     => ['required', 'date_format:H:i'], // 退勤時間は必須
+            'break_start'   => ['nullable', 'array'],           // 外枠が配列であること
+            'break_start.*' => ['nullable', 'date_format:H:i'], // 中身の1つ1つが正しい形式であること
+            'break_end'     => ['nullable', 'array'],
+            'break_end.*'   => ['nullable', 'date_format:H:i'],
+            'remarks'       => ['required'], // 備考は必須
         ];
     }
 
@@ -46,11 +48,13 @@ class AttendanceUpdateRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'check_in.required'  => '出勤時間を入力してください',
-            'check_out.required' => '退勤時間を入力してください',
-            'break_start.array'  => '休憩時間の形式が不正です',
-            'break_end.array'    => '休憩時間の形式が不正です',
-            'remarks.required'   => '備考を記入してください',
+            'check_in.required'         => '出勤時間を入力してください',
+            'check_out.required'        => '退勤時間を入力してください',
+            'break_start.array'         => '休憩時間の形式が不正です',
+            'break_end.array'           => '休憩時間の形式が不正です',
+            'break_start.*.date_format' => '時刻形式で入力してください',
+            'break_end.*.date_format'   => '時刻形式で入力してください',
+            'remarks.required'          => '備考を記入してください',
         ];
     }
 
@@ -60,6 +64,7 @@ class AttendanceUpdateRequest extends FormRequest
             // 入力された「出勤」「退勤」を一旦変数に入れる
             $checkIn  = $this->input('check_in');
             $checkOut = $this->input('check_out');
+
             // 休憩の開始・終了配列を取得。空なら空配列を入れる
             $breakStarts = $this->input('break_start', []);
             $breakEnds   = $this->input('break_end', []);
@@ -68,27 +73,10 @@ class AttendanceUpdateRequest extends FormRequest
             $cCheckIn  = $checkIn ? Carbon::parse($checkIn) : null;
             $cCheckOut = $checkOut ? Carbon::parse($checkOut) : null;
 
-            // --- 重複エラーを避けるための共通関数 ---
-            // $index: 休憩の行番号
-            // $key: 'break_start' または 'break_end'
-            // $message: エラー文言
-            // $addUniqueError = function ($index, $key, $message) use ($validator) {
-            //     $allErrors = $validator->errors();
-            //     $currentBreakErrors = array_merge(
-            //         $allErrors->get("break_start.{$index}"),
-            //         $allErrors->get("break_end.{$index}")
-            //     );
-
-            //     // すでに同じメッセージが存在しなければ追加する
-            //     if (!in_array($message, $currentBreakErrors)) {
-            //         $allErrors->add("{$key}.{$index}", $message);
-            //     }
-            // };
-
             // 1. 出勤・退勤の不整合チェック
             // 出勤と退勤、両方の入力がある場合のみチェック
             if ($cCheckIn && $cCheckOut) {
-                // 出勤(gt: greater than)退勤より後の時間だったらエラー
+                // 出勤時間が退勤時間より後の時間だったらエラー(gt: greater than)
                 if ($cCheckIn->gt($cCheckOut)) {
                     $validator->errors()->add('check_out', '出勤時間もしくは退勤時間が不適切な値です'); //機能要件にあるルール1
                 }
@@ -99,37 +87,43 @@ class AttendanceUpdateRequest extends FormRequest
                 // 同じ番号（index）の終了時間を取得
                 $end = $breakEnds[$index] ?? null;
 
-                // 比較用にCarbonオブジェクト化（休憩時間はループごとに変わるのでループ内で定義）
+                // 比較用にCarbonオブジェクト化
                 $cStart = $start ? Carbon::parse($start) : null;
                 $cEnd   = $end ? Carbon::parse($end) : null;
 
-                // 2. 休憩開始が単独で「出勤前」または「退勤後」
-                if ($cStart && $cCheckIn && $cCheckOut) {
-                    if ($cStart->lt($cCheckIn) || $cStart->gt($cCheckOut)) {
-                        $validator->errors()->add("break_start.{$index}", '休憩時間が不適切な値です'); //機能要件にあるルール2
-                    }
-                }
 
-                // 3. 休憩終了が単独で「退勤後」または「出勤前」
-                if ($cEnd && $cCheckIn && $cCheckOut) {
-                    if ($cEnd->lt($cCheckIn) || $cEnd->gt($cCheckOut)) {
-                        $validator->errors()->add("break_end.{$index}", '休憩時間もしくは退勤時間が不適切な値です'); //機能要件にあるルール3
-                    }
-                }
-
-                // 4. 休憩時間の入力必須チェック
+                // 2. 休憩時間の入力必須チェック
                 if (empty($start) && !empty($end)) {
                     $validator->errors()->add("break_start.{$index}", '休憩開始時間を入力してください');
+                    continue; // 必須エラーが出たら、その行の他のチェックは飛ばす
                 }
                 if (!empty($start) && empty($end)) {
                     $validator->errors()->add("break_end.{$index}", '休憩終了時間を入力してください');
+                    continue; // 必須エラーが出たら、その行の他のチェックは飛ばす
                 }
 
-                // 5. 休憩の開始・終了の前後チェック
-                if ($start && $end) {
+                if ($cStart && $cEnd) {
+                    // 3. 休憩の開始・終了の前後チェック
                     // 休憩開始が終了より後(gt)だったらエラー
                     if ($cStart->gt($cEnd)) {
-                        $validator->errors()->add("break_end.{$index}", '休憩終了時間は休憩開始時間より後の時間を入力してください');
+                        $validator->errors()->add("break_end.{$index}", '休憩時間が不適切な値です');
+                    }
+
+                    if ($cCheckIn && $cCheckOut) {
+                        // 4. 休憩開始が「出勤前」または「退勤後」:機能要件にあるルール2
+                        if ($cStart->lt($cCheckIn) || $cStart->gt($cCheckOut)) {
+                            $validator->errors()->add("break_start.{$index}", '休憩時間が不適切な値です');
+                        }
+
+                        // 5. 休憩終了が「退勤後」:機能要件にあるルール3
+                        if ($cEnd->gt($cCheckOut)) {
+                            $validator->errors()->add("break_end.{$index}", '休憩時間もしくは退勤時間が不適切な値です');
+                        }
+
+                        // 6. 休憩終了が「出勤前」
+                        if ($cEnd->lt($cCheckIn)) {
+                            $validator->errors()->add("break_end.{$index}", '休憩時間が不適切な値です');
+                        }
                     }
                 }
             }

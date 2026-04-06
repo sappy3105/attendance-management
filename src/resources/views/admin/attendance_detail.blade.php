@@ -129,11 +129,19 @@
                         <td class="attendance-detail__value">
                             <div class="attendance-detail__item-group">
                                 <div class="attendance-detail__time-inputs">
-                                    <input type="time" name="break_start[]" class="attendance-detail__input"
+                                    <input type="time" name="break_start[{{ $nextIndex }}]" class="attendance-detail__input"
                                         value="{{ old("break_start.$nextIndex") }}">
                                     <span class="attendance-detail__separator">〜</span>
-                                    <input type="time" name="break_end[]" class="attendance-detail__input"
+                                    <input type="time" name="break_end[{{ $nextIndex }}]" class="attendance-detail__input"
                                         value="{{ old("break_end.$nextIndex") }}">
+                                </div>
+                                <div class="attendance-detail__error-message">
+                                    @error("break_start.$nextIndex")
+                                        <div class="error-item">{{ $message }}</div>
+                                    @enderror
+                                    @error("break_end.$nextIndex")
+                                        <div class="error-item">{{ $message }}</div>
+                                    @enderror
                                 </div>
                             </div>
                         </td>
