@@ -95,7 +95,7 @@ class AttendanceUpdateRequest extends FormRequest
                 // 2. 休憩時間の入力必須チェック
                 if (empty($start) && !empty($end)) {
                     $validator->errors()->add("break_start.{$index}", '休憩開始時間を入力してください');
-                    continue; // 必須エラーが出たら、その行の他のチェックは飛ばす
+                    continue; // 入力必須エラーが出たら、その行の他のチェックは飛ばす
                 }
                 if (!empty($start) && empty($end)) {
                     $validator->errors()->add("break_end.{$index}", '休憩終了時間を入力してください');
@@ -111,7 +111,7 @@ class AttendanceUpdateRequest extends FormRequest
                     }
 
                     if ($cCheckIn && $cCheckOut) {
-                        // 4. 休憩開始が「出勤前」または「退勤後」、休憩終了が「出勤前」:機能要件にあるルール2
+                        // 4. 休憩開始が「出勤前」または「退勤後」:機能要件にあるルール2
                         if ($cStart->lt($cCheckIn) || $cStart->gt($cCheckOut)) {
                             $validator->errors()->add("break_start.{$index}", '休憩時間が不適切な値です');
                         }
