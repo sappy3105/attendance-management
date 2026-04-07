@@ -19,7 +19,7 @@
                 <div class="register-form__group">
                     <label class="register-form__label" for="email">メールアドレス</label>
                     <input class="register-form__input" type="email" name="email" id="email"
-                        value="{{ old('email') }}" autofocus>
+                        value="{{ old('email') }}">
                     <div class="register-form__error-message">
                         @error('email')
                             {{ $message }}

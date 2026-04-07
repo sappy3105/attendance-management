@@ -107,22 +107,20 @@ class AttendanceUpdateRequest extends FormRequest
                     // 休憩開始が終了より後(gt)だったらエラー
                     if ($cStart->gt($cEnd)) {
                         $validator->errors()->add("break_end.{$index}", '休憩時間が不適切な値です');
+                        continue;
                     }
 
                     if ($cCheckIn && $cCheckOut) {
-                        // 4. 休憩開始が「出勤前」または「退勤後」:機能要件にあるルール2
+                        // 4. 休憩開始が「出勤前」または「退勤後」、休憩終了が「出勤前」:機能要件にあるルール2
                         if ($cStart->lt($cCheckIn) || $cStart->gt($cCheckOut)) {
                             $validator->errors()->add("break_start.{$index}", '休憩時間が不適切な値です');
                         }
 
                         // 5. 休憩終了が「退勤後」:機能要件にあるルール3
                         if ($cEnd->gt($cCheckOut)) {
-                            $validator->errors()->add("break_end.{$index}", '休憩時間もしくは退勤時間が不適切な値です');
-                        }
-
-                        // 6. 休憩終了が「出勤前」
-                        if ($cEnd->lt($cCheckIn)) {
-                            $validator->errors()->add("break_end.{$index}", '休憩時間が不適切な値です');
+                            if (!$validator->errors()->has("break_start.{$index}")) {
+                                $validator->errors()->add("break_end.{$index}", '休憩時間もしくは退勤時間が不適切な値です');
+                            }
                         }
                     }
                 }
