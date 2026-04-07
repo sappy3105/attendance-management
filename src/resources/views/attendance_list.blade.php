@@ -6,18 +6,18 @@
 
         {{-- ページネーション & 月選択 --}}
         <div class="attendance-list__nav">
-            <a href="{{ url('/attendance/list?month=' . $prevMonth) }}" class="nav-button">← 前月</a>
+            <a href="{{ route('admin.attendance.list', ['date' => $prevDate]) }}" class="nav-button">← 前月</a>
 
             <div class="month-picker" onclick="document.getElementById('month-input').showPicker();">
                 <input type="month" id="month-input" class="hidden-month-input" value="{{ $currentMonth->format('Y-m') }}"
-                    onchange="location.href='/attendance/list?month='+this.value">
+                    onchange="location.href='{{ route('attendance.list') }}?month='+this.value">
                 <label class="month-display">
                     <img src="{{ asset('images/calendar_icon.svg') }}" alt="カレンダー" class="calendar-trigger-icon">
                     {{ $currentMonth->format('Y/m') }}
                 </label>
             </div>
 
-            <a href="{{ url('/attendance/list?month=' . $nextMonth) }}" class="nav-button">翌月 →</a>
+            <a href="{{ route('admin.attendance.list', ['date' => $nextDate]) }}" class="nav-button">翌月 →</a>
         </div>
 
         {{-- 勤怠テーブル --}}
@@ -42,24 +42,16 @@
                         <td>{{ $day->isoFormat('MM/DD(ddd)') }}</td>
 
                         {{-- 出勤時刻 --}}
-                        <td>
-                            {{ $attendance && $attendance->check_in ? $attendance->check_in->format('H:i') : '' }}
-                        </td>
+                        <td>{{ $attendance?->check_in?->format('H:i') ?? '' }}</td>
 
                         {{-- 退勤時刻 --}}
-                        <td>
-                            {{ $attendance && $attendance->check_out ? $attendance->check_out->format('H:i') : '' }}
-                        </td>
+                        <td>{{ $attendance?->check_out?->format('H:i') ?? '' }}</td>
 
                         {{-- 休憩合計時間 --}}
-                        <td>
-                            {{ $attendance ? $attendance->getTotalRestTime() : '' }}
-                        </td>
+                        <td>{{ $attendance ? $attendance->getTotalRestTime() : '' }}</td>
 
                         {{-- 勤務合計時間 --}}
-                        <td>
-                            {{ $attendance ? $attendance->getTotalWorkTime() : '' }}
-                        </td>
+                        <td>{{ $attendance ? $attendance->getTotalWorkTime() : '' }}</td>
 
                         <td>
                             @if ($day->isPast() || $day->isToday())

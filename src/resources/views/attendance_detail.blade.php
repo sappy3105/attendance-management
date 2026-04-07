@@ -10,6 +10,7 @@
                 {{ session('success') }}
             </div>
         @endif
+        
         <form action="{{ route('attendance.update', $attendance->id) }}" method="POST" class="attendance-detail__form">
             @csrf
             <table class="attendance-detail__table">
@@ -25,11 +26,11 @@
                         <div class="attendance-detail__date-container">
                             {{-- 年と月日を分けて配置 --}}
                             <span class="attendance-detail__date-year">
-                                {{ $attendance->date->format('Y年') }}
+                                {{ $attendance ? $attendance->date->format('Y年') : now()->format('Y年') }}
                             </span>
                             <span class="attendance-detail__date-separator"></span> {{-- 空白を作るための要素 --}}
                             <span class="attendance-detail__date-month">
-                                {{ $attendance->date->isoFormat('M月D日') }}
+                                {{ $attendance ? $attendance->date->isoFormat('M月D日') : now()->isoFormat('M月D日') }}
                             </span>
                         </div>
                     </td>
@@ -118,6 +119,7 @@
                 {{-- 申請中でなければ、追加用の空欄を1行表示する --}}
                 @if (!$isPending)
                     @php $nextIndex = count($rests); @endphp
+
                     <tr class="attendance-detail__row">
                         <th class="attendance-detail__label">
                             休憩{{ $nextIndex > 0 ? $nextIndex + 1 : '' }}
@@ -125,11 +127,11 @@
                         <td class="attendance-detail__value">
                             <div class="attendance-detail__item-group">
                                 <div class="attendance-detail__time-inputs">
-                                    <input type="time" name="break_start[{{ $nextIndex }}]" class="attendance-detail__input"
-                                        value="{{ old("break_start.$nextIndex") }}">
+                                    <input type="time" name="break_start[{{ $nextIndex }}]"
+                                        class="attendance-detail__input" value="{{ old("break_start.$nextIndex") }}">
                                     <span class="attendance-detail__separator">〜</span>
-                                    <input type="time" name="break_end[{{ $nextIndex }}]" class="attendance-detail__input"
-                                        value="{{ old("break_end.$nextIndex") }}">
+                                    <input type="time" name="break_end[{{ $nextIndex }}]"
+                                        class="attendance-detail__input" value="{{ old("break_end.$nextIndex") }}">
                                 </div>
                                 <div class="attendance-detail__error-message">
                                     @error("break_start.$nextIndex")

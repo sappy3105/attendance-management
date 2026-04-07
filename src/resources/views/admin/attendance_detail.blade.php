@@ -122,6 +122,7 @@
                 {{-- 申請中でなければ、追加用の空欄を1行表示する --}}
                 @if (!$isPending)
                     @php $nextIndex = count($rests); @endphp
+
                     <tr class="attendance-detail__row">
                         <th class="attendance-detail__label">
                             休憩{{ $nextIndex > 0 ? $nextIndex + 1 : '' }}
@@ -129,11 +130,11 @@
                         <td class="attendance-detail__value">
                             <div class="attendance-detail__item-group">
                                 <div class="attendance-detail__time-inputs">
-                                    <input type="time" name="break_start[{{ $nextIndex }}]" class="attendance-detail__input"
-                                        value="{{ old("break_start.$nextIndex") }}">
+                                    <input type="time" name="break_start[{{ $nextIndex }}]"
+                                        class="attendance-detail__input" value="{{ old("break_start.$nextIndex") }}">
                                     <span class="attendance-detail__separator">〜</span>
-                                    <input type="time" name="break_end[{{ $nextIndex }}]" class="attendance-detail__input"
-                                        value="{{ old("break_end.$nextIndex") }}">
+                                    <input type="time" name="break_end[{{ $nextIndex }}]"
+                                        class="attendance-detail__input" value="{{ old("break_end.$nextIndex") }}">
                                 </div>
                                 <div class="attendance-detail__error-message">
                                     @error("break_start.$nextIndex")
@@ -159,11 +160,6 @@
                                 <textarea name="remarks" class="attendance-detail__textarea" rows="4">{{ old('remarks', $displayData['remarks']) }}</textarea>
                                 <div class="attendance-detail__error-message">
                                     @error('remarks')
-                                        <div class="error-item">{{ $message }}</div>
-                                    @enderror
-
-                                    {{-- 前にアドバイスした「二重申請ガード」のエラーもここに出すと親切です --}}
-                                    @error('already_pending')
                                         <div class="error-item">{{ $message }}</div>
                                     @enderror
                                 </div>
