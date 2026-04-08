@@ -50,12 +50,10 @@
 
                 {{-- 3. 休憩中の場合：休憩戻を表示 --}}
             @elseif($attendance->status === 2)
-                <div class="attendance__panel">
-                    <form action="/attendance/break-end" method="post">
-                        @csrf
-                        <button class="attendance__button-rest" type="submit">休憩戻</button>
-                    </form>
-                </div>
+                <form action="/attendance/break-end" method="post">
+                    @csrf
+                    <button class="attendance__button-rest" type="submit">休憩戻</button>
+                </form>
 
                 {{-- 4. 退勤後の場合：メッセージ表示 --}}
             @elseif($attendance->status === 3)
@@ -63,7 +61,6 @@
                     お疲れ様でした。
                 </div>
             @endif
-            {{-- TODO: 今後、出勤中なら「休憩」「退勤」ボタンを出す処理を追加します --}}
         </div>
     </div>
 @endsection

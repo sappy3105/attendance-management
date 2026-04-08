@@ -110,11 +110,13 @@ class AdminAttendanceController extends Controller
         $monthStr = $request->query('month');
         $currentMonth = $monthStr ? Carbon::parse($monthStr)->startOfMonth() : Carbon::today()->startOfMonth();
 
-        $user = User::with(['attendances' => function ($query) use ($currentMonth) {
-            $query->with('rests')
-                ->whereYear('date', $currentMonth->year)
-                ->whereMonth('date', $currentMonth->month);
-        }])->findOrFail($id);
+        $user = User::where('role', 1)
+            ->with(['attendances' => function ($query) use ($currentMonth) {
+                $query->with('rests')
+                    ->whereYear('date', $currentMonth->year)
+                    ->whereMonth('date', $currentMonth->month);
+            }])
+            ->findOrFail($id);
 
         // 2. Bladeで扱いやすいよう、日付をキーにしたコレクションにする
         $attendances = $user->attendances->keyBy(function ($item) {
@@ -213,6 +215,11 @@ class AdminAttendanceController extends Controller
         $correctRequest = AttendanceCorrectRequest::with(['restCorrectRequests'])
             ->findOrFail($attendance_correct_request_id);
 
+        // すでに承認済みの場合は何もしない（またはエラーを出す）
+        if ($correctRequest->status === 2) {
+            return redirect()->back();
+        }
+
         DB::transaction(function () use ($correctRequest) {
             // 2. 本番の勤怠レコード(attendances)を更新
             $attendance = Attendance::findOrFail($correctRequest->attendance_id);
@@ -246,7 +253,7 @@ class AdminAttendanceController extends Controller
         // 1. パラメータ（IDと月）を受け取る
         $userId = $request->input('id');
         $monthString = $request->input('month', now()->format('Y-m'));
-        $user = User::findOrFail($userId);
+        $user = User::where('role', 1)->findOrFail($userId);
 
         // 1. その月の開始日と終了日を取得
         $startOfMonth = Carbon::parse($monthString)->startOfMonth();
@@ -269,14 +276,14 @@ class AdminAttendanceController extends Controller
         $period = CarbonPeriod::create($startOfMonth, $endOfMonth);
 
         foreach ($period as $date) {
-            $dateStr = $date->format('Y-m-d');
-            // その日の勤怠データがあるか確認
-            $attendance = $attendances->get($dateStr);
-
-            // 日付フォーマットを定義
-            $formattedDate = $date->format('Y/m/d');
+            $dateStr = $date->format('Y-m-d'); // その日の勤怠データがあるか確認
+            $attendance = $attendances->get($dateStr); // その日のデータを取得
+            $formattedDate = $date->format('Y/m/d'); // 日付フォーマットを定義
 
             if ($attendance) {
+                // 備考欄の改行をスペースに変換
+                $cleanRemarks = str_replace(["\r\n", "\r", "\n"], ' ', $attendance->remarks);
+
                 $csvData[] = [
                     $user->name,
                     $formattedDate,
@@ -284,7 +291,7 @@ class AdminAttendanceController extends Controller
                     $attendance->check_out ? $attendance->check_out->format('H:i') : '',
                     $attendance->getTotalRestTime(), //休憩時間合計
                     $attendance->getTotalWorkTime(), //労働時間合計
-                    $attendance->remarks, //備考
+                    $cleanRemarks, //備考
                 ];
             } else {
                 // データがない場合（日付と名前以外は空欄）
@@ -295,7 +302,7 @@ class AdminAttendanceController extends Controller
                     '',
                     '',
                     '',
-                    ''
+                    '',
                 ];
             }
         }
@@ -318,7 +325,7 @@ class AdminAttendanceController extends Controller
         // 4. レスポンスヘッダーの設定
         $headers = [
             "Content-type" => "text/csv", //CSVデータという宣言
-            "Content-Disposition" => "attachment; filename=$filename", //画面に表示せず、「添付ファイル（attachment）」として扱い、この「ファイル名（filename）」で保存してください、という指示
+            "Content-Disposition" => "attachment; filename=" . rawurlencode($filename), //画面に表示せず、「添付ファイル（attachment）」として扱い、指定のファイル名(日本語を認識できる形）で保存
         ];
         return response()->stream($callback, 200, $headers);
     }

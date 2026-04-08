@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Http\Requests\AttendanceUpdateRequest;
 use App\Models\User;
@@ -10,7 +11,6 @@ use App\Models\Attendance;
 use App\Models\Rest;
 use App\Models\AttendanceCorrectRequest;
 use App\Models\RestCorrectRequest;
-use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
 class AttendanceController extends Controller
