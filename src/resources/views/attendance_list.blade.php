@@ -6,7 +6,7 @@
 
         {{-- ページネーション & 月選択 --}}
         <div class="attendance-list__nav">
-            <a href="{{ route('admin.attendance.list', ['date' => $prevDate]) }}" class="nav-button">← 前月</a>
+            <a href="{{ route('attendance.list', ['month' => $prevMonth]) }}" class="nav-button">← 前月</a>
 
             <div class="month-picker" onclick="document.getElementById('month-input').showPicker();">
                 <input type="month" id="month-input" class="hidden-month-input" value="{{ $currentMonth->format('Y-m') }}"
@@ -17,7 +17,7 @@
                 </label>
             </div>
 
-            <a href="{{ route('admin.attendance.list', ['date' => $nextDate]) }}" class="nav-button">翌月 →</a>
+            <a href="{{ route('attendance.list', ['month' => $nextMonth]) }}" class="nav-button">翌月 →</a>
         </div>
 
         {{-- 勤怠テーブル --}}

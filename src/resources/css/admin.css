@@ -104,21 +104,6 @@
     cursor: pointer;
 }
 
-/* 修正申請承認画面 */
-.attendance-detail__approved-label{
-    display: inline-block;
-        /* テキスト要素をボタンと同じ振る舞いに */
-    background-color: #606060;
-    color: #fff;
-    padding: 10px 20px;
-    font-size: 18px;
-    letter-spacing: 3px;
-    text-indent: 3px;
-    border-radius: 5px;
-    text-align: center;
-    box-sizing: border-box;
-}
-
 /* CSV出力ボタン */
 .attendance-list__actions {
     margin-top: 30px;

@@ -54,6 +54,10 @@ Route::middleware('auth', 'verified')->group(function () {
 
         // 申請一覧画面表示
         Route::get('/stamp_correction_request/list', [AttendanceController::class, 'showRequestList'])->name('attendance.requests');
+
+        // 申請一覧からの確認用画面（動的セグメントを利用）←削除するかも
+        Route::get('/stamp-correction-request/approve/{attendance_correct_request_id}', [AttendanceController::class, 'showApprovalStatus'])
+            ->name('attendance.approve.status');
     });
 
     // 管理者用

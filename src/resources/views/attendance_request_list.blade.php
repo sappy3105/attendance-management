@@ -38,8 +38,10 @@
                             {{ $request->created_at->format('Y/m/d') }}
                         </td>
                         <td class="request-list__value">
-                            <a href="{{ route('attendance.detail', ['id' => $request->attendance_id]) }}"
-                                class="request-list__link">詳細</a>
+                            {{-- <a href="{{ route('attendance.detail', ['id' => $request->attendance_id]) }}"
+                                class="request-list__link">詳細</a> --}}
+                            <a href="{{ route('attendance.approve.status', ['attendance_correct_request_id' => $request->id]) }}"
+                                class="request-list__link">詳細</a>{{-- 削除するかも --}}
                         </td>
                     </tr>
                 @endforeach
