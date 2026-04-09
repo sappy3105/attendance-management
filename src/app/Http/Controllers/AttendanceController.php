@@ -6,11 +6,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Http\Requests\AttendanceUpdateRequest;
-use App\Models\User;
 use App\Models\Attendance;
-use App\Models\Rest;
-use App\Models\AttendanceCorrectRequest;
-use App\Models\RestCorrectRequest;
 use Carbon\Carbon;
 
 class AttendanceController extends Controller
@@ -276,7 +272,8 @@ class AttendanceController extends Controller
     public function showApprovalStatus($attendance_correct_request_id)
     {
         // 申請データを取得（リレーションでユーザーと休憩申請も取得）
-        $attendanceCorrectRequest = AttendanceCorrectRequest::with(['user', 'restCorrectRequests'])
+        $attendanceCorrectRequest = Auth::user()->attendanceCorrectRequests()
+            ->with(['user', 'restCorrectRequests'])
             ->findOrFail($attendance_correct_request_id);
 
         return view('attendance_approval_status', compact('attendanceCorrectRequest'));
