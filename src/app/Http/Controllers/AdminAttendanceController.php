@@ -6,9 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\AttendanceUpdateRequest;
 use App\Models\User;
 use App\Models\Attendance;
-use App\Models\Rest;
 use App\Models\AttendanceCorrectRequest;
-use App\Models\RestCorrectRequest;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
@@ -222,7 +220,7 @@ class AdminAttendanceController extends Controller
 
         DB::transaction(function () use ($correctRequest) {
             // 2. 本番の勤怠レコード(attendances)を更新
-            $attendance = Attendance::findOrFail($correctRequest->attendance_id);
+            $attendance = $correctRequest->attendance;
             $attendance->update([
                 'check_in'  => $correctRequest->check_in,
                 'check_out' => $correctRequest->check_out,
@@ -245,7 +243,6 @@ class AdminAttendanceController extends Controller
 
         return redirect()->back();
     }
-
 
     /** CSVへの書き出し処理 */
     public function export(Request $request)
