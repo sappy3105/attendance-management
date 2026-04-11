@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\User;
 use App\Models\Attendance;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -18,9 +19,12 @@ class AttendanceFactory extends Factory
     public function definition(): array
     {
         return [
-            'attendance_id' => Attendance::factory(),
-            'break_start' => '12:00:00',
-            'break_end' => '13:00:00',
+            'user_id' => User::factory(),
+            'date' => fake()->dateTimeBetween('-1 month', 'now')->format('Y-m-d'),
+            'check_in' => '09:00:00',
+            'check_out' => '18:00:00',
+            'status' => 3, // 退勤済
+            'remarks' => fake()->realText(20),
         ];
     }
 }

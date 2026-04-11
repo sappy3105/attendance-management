@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\AttendanceCorrectRequest;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -17,7 +18,9 @@ class RestCorrectRequestFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'attendance_correct_request_id' => AttendanceCorrectRequest::factory(),
+            'break_start' => '12:15',
+            'break_end' => '13:15',
         ];
     }
 }
