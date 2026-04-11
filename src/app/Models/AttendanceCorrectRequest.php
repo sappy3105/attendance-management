@@ -23,6 +23,7 @@ class AttendanceCorrectRequest extends Model
         'date' => 'date',
         'check_in' => 'immutable_datetime:H:i',
         'check_out' => 'immutable_datetime:H:i',
+        'status' => 'integer',
     ];
 
     public function restCorrectRequests()

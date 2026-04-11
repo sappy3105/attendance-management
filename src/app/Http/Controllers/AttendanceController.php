@@ -16,10 +16,10 @@ class AttendanceController extends Controller
     {
         // 今日の日付を取得
         $user = Auth::user();
-        $today = Carbon::today()->format('Y-m-d');
+        $today = Carbon::today();
 
         // ログインユーザーの今日の勤怠レコードを1件取得
-        $attendance = $user->attendances()->where('date', $today)->first();
+        $attendance = $user->attendances()->whereDate('date', $today)->first();
 
         return view('attendance', compact('attendance'));
     }
@@ -28,10 +28,10 @@ class AttendanceController extends Controller
     public function checkIn(Request $request)
     {
         $user = Auth::user();
-        $today = Carbon::today()->format('Y-m-d');
+        $today = Carbon::today();
 
         // 二重打刻防止（今日のデータが既にないか確認）
-        $exists = $user->attendances()->where('date', $today)->exists();
+        $exists = $user->attendances()->whereDate('date', $today)->exists();
 
         if (!$exists) {
             $user->attendances()->create([
@@ -48,9 +48,9 @@ class AttendanceController extends Controller
     public function breakStart(Request $request)
     {
         $user = Auth::user();
-        $today = Carbon::today()->format('Y-m-d');
+        $today = Carbon::today();
 
-        $attendance = $user->attendances()->where('date', $today)->first();
+        $attendance = $user->attendances()->whereDate('date', $today)->first();
 
         if ($attendance && $attendance->status === 1) {
             DB::transaction(function () use ($attendance) {
@@ -70,9 +70,9 @@ class AttendanceController extends Controller
     public function breakEnd(Request $request)
     {
         $user = Auth::user();
-        $today = Carbon::today()->format('Y-m-d');
+        $today = Carbon::today();
 
-        $attendance = $user->attendances()->where('date', $today)->first();
+        $attendance = $user->attendances()->whereDate('date', $today)->first();
 
         if ($attendance && $attendance->status === 2) {
             // 1. break_end が null の最新の休憩レコードを1件取得
@@ -101,9 +101,9 @@ class AttendanceController extends Controller
     public function checkOut(Request $request)
     {
         $user = Auth::user();
-        $today = Carbon::today()->format('Y-m-d');
+        $today = Carbon::today();
 
-        $attendance = $user->attendances()->where('date', $today)->first();
+        $attendance = $user->attendances()->whereDate('date', $today)->first();
 
         if ($attendance && $attendance->status === 1) {
             // 退勤時刻を保存し、ステータスを「4: 退勤済」に更新
@@ -201,7 +201,7 @@ class AttendanceController extends Controller
 
         // 1.元となる勤怠レコードを取得
         $attendance = $user->attendances()->findOrFail($id);
-        $date = $attendance->date->format('Y-m-d');
+        $date = $attendance->date;
 
         // 2. リレーションを使用して「承認待ち」の存在確認
         $existsPending = $attendance->correctRequests()

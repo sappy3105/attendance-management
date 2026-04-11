@@ -21,6 +21,7 @@ class Attendance extends Model
 
     protected $casts = [
         'date' => 'date',
+        'status' => 'integer',
         'check_in' => 'immutable_datetime:H:i',
         'check_out' => 'immutable_datetime:H:i',
     ];
