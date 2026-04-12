@@ -3,10 +3,8 @@
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 use App\Models\User;
-use App\Models\Attendance;
 use Carbon\Carbon;
 
 class AttendanceStatusTest extends TestCase
@@ -17,8 +15,7 @@ class AttendanceStatusTest extends TestCase
 
     protected function setUp(): void
     {
-        parent::setUp();
-        // テストユーザーを作成
+        parent::setUp();// テストユーザーを作成
         $this->user = User::factory()->create();
     }
 
@@ -48,12 +45,6 @@ class AttendanceStatusTest extends TestCase
             'check_in' => '09:00',
             'status' => 1,
         ]);
-        // Attendance::create([
-        //     'user_id' => $this->user->id,
-        //     'date' => $today,
-        //     'check_in' => '09:00:00',
-        //     'status' => 1,
-        // ]);
 
         $response = $this->actingAs($this->user)->get(route('attendance.index'));
 

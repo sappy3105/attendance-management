@@ -65,8 +65,9 @@ class Attendance extends Model
      */
     public function getTotalRestTime()
     {
-        // 出勤・退勤のどちらかがなければ空文字を返す
-        if (!$this->check_in || !$this->check_out) { // 1. 出勤か退勤のどちらかが欠けていれば（退勤前など）
+        // 出勤がなければ空文字を返す
+        if (!$this->check_in) {
+            //if (!$this->check_in || !$this->check_out) { // 1. 出勤か退勤のどちらかが欠けていれば（退勤前など）
             return ''; // 2. 何も計算せずに空文字を返す（エラー防止）
         }
 
