@@ -21,12 +21,18 @@ class AdminAttendanceController extends Controller
         $dateStr = $request->query('date', Carbon::today()->format('Y-m-d'));
         $currentDate = Carbon::parse($dateStr);
 
+        // dd([
+        //     'search_date' => $dateStr,
+        //     'db_sample' => \App\Models\Attendance::first()?->date
+        // ]);
+
         // 5. 全一般ユーザーを取得し、指定日の勤怠と休憩を一括取得（Eager Load）
         $users = User::where('role', 1)
             ->with(['attendances' => function ($query) use ($dateStr) {
-                $query->where('date', $dateStr);
+                $query->whereDate('date', $dateStr);
             }])
             ->get();
+        // dd($users->toArray());
 
         return view('admin.attendance_list', [
             'users'       => $users,
