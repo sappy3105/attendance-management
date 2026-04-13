@@ -29,5 +29,8 @@ cache:
 stop:
 	docker-compose stop
 
+dev:
+	docker-compose exec php npm run dev
+
 sh:
 	docker-compose exec php bash
