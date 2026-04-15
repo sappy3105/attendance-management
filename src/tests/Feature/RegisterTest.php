@@ -107,7 +107,7 @@ class RegisterTest extends TestCase
         // メール送信をシミュレート（実際には送らない）
         Notification::fake();
 
-        // 1. POST送信
+        // 会員登録を実行
         $response = $this->post('/register', [
             'name' => 'テスト太郎',
             'email' => 'newuser@example.com',
