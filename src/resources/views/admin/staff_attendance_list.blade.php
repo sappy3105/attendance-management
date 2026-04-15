@@ -2,7 +2,7 @@
 
 @section('content')
     <div class="attendance-list"> {{-- 一般ユーザーと同じクラス名 --}}
-        <h1 class="attendance-list__heading">{{ $user->name }}の勤怠</h1>
+        <h1 class="attendance-list__heading">{{ $user->name }}さんの勤怠</h1>
 
         <div class="attendance-list__nav">
             {{-- URLにスタッフIDを含めるよう修正 --}}
