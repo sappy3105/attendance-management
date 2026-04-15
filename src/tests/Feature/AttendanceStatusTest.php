@@ -36,12 +36,13 @@ class AttendanceStatusTest extends TestCase
      */
     public function test_status_is_working()
     {
-        // テスト上の「今」を固定
-        $this->travelTo(Carbon::create(2026, 4, 11, 10, 0, 0));
+        // テスト上の日時を固定
+        $date = Carbon::create(2026, 4, 11, 10, 0, 0);
+        $this->travelTo($date);
 
         // 今日の勤怠レコードを作成（status 1: 出勤中）
         $this->user->attendances()->create([
-            'date' => now(),
+            'date' => $date->format('Y-m-d'),
             'check_in' => '09:00',
             'status' => 1,
         ]);
@@ -57,12 +58,13 @@ class AttendanceStatusTest extends TestCase
      */
     public function test_status_is_on_break()
     {
-        // テスト上の「今」を固定
-        $this->travelTo(Carbon::today());
+        // テスト上の日時を固定
+        $date = Carbon::create(2026, 4, 11, 13, 0, 0);
+        $this->travelTo($date);
 
         // 今日の勤怠レコードを作成（status 2: 休憩中）
         $this->user->attendances()->create([
-            'date' => Carbon::today()->format('Y-m-d'),
+            'date' => $date->format('Y-m-d'),
             'check_in' => '09:00:00',
             'status' => 2,
         ]);
@@ -78,15 +80,16 @@ class AttendanceStatusTest extends TestCase
      */
     public function test_status_is_worked_out()
     {
-        // テスト上の「今」を固定
-        $this->travelTo(Carbon::today());
+        // テスト上の日時を固定
+        $date = Carbon::create(2026, 4, 11, 19, 0, 0);
+        $this->travelTo($date);
 
         // 今日の勤怠レコードを作成（status 3: 退勤済）
         $this->user->attendances()->create([
-            'date' => Carbon::today()->format('Y-m-d'),
-            'check_in' => '09:00:00',
+            'date'      => $date->format('Y-m-d'),
+            'check_in'  => '09:00:00',
             'check_out' => '18:00:00',
-            'status' => 3,
+            'status'    => 3,
         ]);
 
         $response = $this->actingAs($this->user)->get(route('attendance.index'));

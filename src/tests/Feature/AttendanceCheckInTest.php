@@ -24,7 +24,8 @@ class AttendanceCheckInTest extends TestCase
      */
     public function test_check_in_button_functions_correctly()
     {
-        $this->travelTo(Carbon::create(2026, 4, 12, 9, 0, 0));
+        $date = Carbon::create(2026, 4, 12, 9, 0, 0);
+        $this->travelTo($date);
 
         // ログインして勤怠画面を開く
         $response = $this->actingAs($this->user)->get(route('attendance.index'));
@@ -51,11 +52,12 @@ class AttendanceCheckInTest extends TestCase
      */
     public function test_cannot_check_in_twice_a_day()
     {
-        $this->travelTo(Carbon::create(2026, 4, 12, 18, 0, 0));
+        $date = Carbon::create(2026, 4, 12, 18, 0, 0);
+        $this->travelTo($date);
 
         // すでに退勤済みのデータを作成しておく
         $this->user->attendances()->create([
-            'date' => now(),
+            'date' => $date->format('Y-m-d'),
             'check_in' => '09:00',
             'check_out' => '18:00:00',
             'status' => 3, // 退勤済
