@@ -255,11 +255,23 @@ class AttendanceController extends Controller
         $statusMode = $request->query('status', 'pending');
         $statusId = ($statusMode === 'approved') ? 2 : 1;
 
-        $requests = $user->attendanceCorrectRequests() // Userモデルに定義したリレーションを使用
+        // 基本の$statusIdでの一覧取得
+        $query = $user->attendanceCorrectRequests() // Userモデルに定義したリレーション
             ->with('attendance')
-            ->where('status', $statusId)
-            ->orderBy('created_at', 'desc')
-            ->get();
+            ->where('status', $statusId);
+
+        // 承認済み(status=2)の場合のみ、同じ勤怠(attendance_id)の中で最新の1件に絞る
+        if ($statusId === 2) {
+            $query->whereIn('id', function ($subQuery) use ($user) {
+                $subQuery->select(DB::raw('MAX(id)')) // 「IDの最大値（＝最新の申請ID）」を選択
+                    ->from('attendance_correct_requests') // 検索対象のテーブルは「修正申請テーブル」
+                    ->where('user_id', $user->id) // 「ログインしている自分自身のデータ」に限定
+                    ->where('status', 2) // かつ「承認済み（statusが2）」のデータのみを対象にする
+                    ->groupBy('attendance_id'); // 勤務日（attendance_id）が同じ申請をグループ化
+            });
+        }
+
+        $requests = $query->orderBy('created_at', 'desc')->get();
 
         return view('attendance_request_list', [
             'user'     => $user,
