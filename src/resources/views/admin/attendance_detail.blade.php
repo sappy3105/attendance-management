@@ -43,32 +43,30 @@
                             {{-- 申請中の時はテキスト表示 --}}
                             <div class="attendance-detail__time-group">
                                 <span class="attendance-detail__text-time">
-                                    {{ $displayData['check_in'] ? $displayData['check_in']->format('H:i') : '' }}
+                                    {{ $displayData['check_in']?->format('H:i') }}
                                 </span>
                                 <span class="attendance-detail__separator">〜</span>
                                 <span class="attendance-detail__text-time">
-                                    {{ $displayData['check_out'] ? $displayData['check_out']->format('H:i') : '' }}
+                                    {{ $displayData['check_out']?->format('H:i') }}
                                 </span>
                             </div>
                         @else
-                            <div class="attendance-detail__time-group">
+                            <div class="attendance-detail__item-group">
                                 <div class="attendance-detail__time-inputs">
                                     <input type="time" name="check_in" class="attendance-detail__input"
-                                        {{-- optionalを使うと、nullの場合でもエラーにならず空文字を返してくれます --}}
-                                        value="{{ old('check_in', optional($displayData['check_in'])->format('H:i')) }}">
+                                        value="{{ old('check_in', $displayData['check_in']?->format('H:i')) }}">
                                     <span class="attendance-detail__separator">〜</span>
                                     <input type="time" name="check_out" class="attendance-detail__input"
-                                        value="{{ old('check_out', optional($displayData['check_out'])->format('H:i')) }}">
+                                        value="{{ old('check_out', $displayData['check_out']?->format('H:i')) }}">
                                 </div>
-                            </div>
-
-                            <div class="attendance-detail__error-message">
-                                @error('check_in')
-                                    <div class="error-item">{{ $message }}</div>
-                                @enderror
-                                @error('check_out')
-                                    <div class="error-item">{{ $message }}</div>
-                                @enderror
+                                <div class="attendance-detail__error-message">
+                                    @error('check_in')
+                                        <div class="error-item">{{ $message }}</div>
+                                    @enderror
+                                    @error('check_out')
+                                        <div class="error-item">{{ $message }}</div>
+                                    @enderror
+                                </div>
                             </div>
                         @endif
                     </td>
@@ -85,25 +83,25 @@
                                 {{-- 承認待ち：テキスト表示 --}}
                                 <div class="attendance-detail__time-group">
                                     <span class="attendance-detail__text-time">
-                                        {{ optional($rest->break_start)->format('H:i') }}
+                                        {{ $rest->break_start?->format('H:i') }}
                                     </span>
                                     <span class="attendance-detail__separator">〜</span>
                                     <span class="attendance-detail__text-time">
-                                        {{ optional($rest->break_end)->format('H:i') }}
+                                        {{ $rest->break_end?->format('H:i') }}
                                     </span>
                                 </div>
                             @else
-                                <div class="attendance-detail__time-group">
+                                <div class="attendance-detail__item-group">
                                     <div class="attendance-detail__time-inputs">
                                         <input type="time" name="break_start[{{ $loop->index }}]"
                                             class="attendance-detail__input"
-                                            value="{{ old("break_start.{$loop->index}", optional($rest->break_start)->format('H:i')) }}">
+                                            value="{{ old("break_start.{$loop->index}", $rest->break_start?->format('H:i')) }}">
 
                                         <span class="attendance-detail__separator">〜</span>
 
                                         <input type="time" name="break_end[{{ $loop->index }}]"
                                             class="attendance-detail__input"
-                                            value="{{ old("break_end.{$loop->index}", optional($rest->break_end)->format('H:i')) }}">
+                                            value="{{ old("break_end.{$loop->index}", $rest->break_end?->format('H:i')) }}">
                                     </div>
                                     <div class="attendance-detail__error-message">
                                         @error("break_start.{$loop->index}")
