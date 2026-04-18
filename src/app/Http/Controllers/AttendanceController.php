@@ -253,15 +253,26 @@ class AttendanceController extends Controller
 
         // クエリパラメータから表示モードを取得（デフォルトは承認待ち：pending）
         $statusMode = $request->query('status', 'pending');
-        $statusId = ($statusMode === 'approved') ? 2 : 1;
+        $statusCode = ($statusMode === 'approved') ? 2 : 1;
 
-        // 基本の$statusIdでの一覧取得
+        // ソートのためのカラムと並び順を決定
+        if ($statusCode === 2) {
+            // 承認済み：承認が新しい順（降順）
+            $sortColumn = 'updated_at';
+            $sortOrder = 'desc';
+        } else {
+            // 承認待ち：申請が古い順（昇順）
+            $sortColumn = 'created_at';
+            $sortOrder = 'asc';
+        }
+
+        // 基本の$statusCodeでの一覧取得
         $query = $user->attendanceCorrectRequests() // Userモデルに定義したリレーション
             ->with('attendance')
-            ->where('status', $statusId);
+            ->where('status', $statusCode);
 
         // 承認済み(status=2)の場合のみ、同じ勤怠(attendance_id)の中で最新の1件に絞る
-        if ($statusId === 2) {
+        if ($statusCode === 2) {
             $query->whereIn('id', function ($subQuery) use ($user) {
                 $subQuery->select(DB::raw('MAX(id)')) // 「IDの最大値（＝最新の申請ID）」を選択
                     ->from('attendance_correct_requests') // 検索対象のテーブルは「修正申請テーブル」
@@ -271,7 +282,7 @@ class AttendanceController extends Controller
             });
         }
 
-        $requests = $query->orderBy('created_at', 'desc')->get();
+        $requests = $query->orderBy($sortColumn, $sortOrder)->get();
 
         return view('attendance_request_list', [
             'user'     => $user,

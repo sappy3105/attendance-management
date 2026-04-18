@@ -6,9 +6,9 @@
 
         {{-- タブ切り替え部分 --}}
         <div class="request-list__tabs">
-            <a href="{{ route('admin.attendance.requests', ['status' => 'pending']) }}"
+            <a href="{{ route('attendance.requests', ['status' => 'pending']) }}"
                 class="request-list__tab {{ $status === 'pending' ? 'is-active' : '' }}">承認待ち</a>
-            <a href="{{ route('admin.attendance.requests', ['status' => 'approved']) }}"
+            <a href="{{ route('attendance.requests', ['status' => 'approved']) }}"
                 class="request-list__tab {{ $status === 'approved' ? 'is-active' : '' }}">承認済み</a>
         </div>
 

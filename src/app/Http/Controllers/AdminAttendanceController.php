@@ -190,10 +190,21 @@ class AdminAttendanceController extends Controller
         $statusMode = $request->query('status', 'pending');
         $statusCode = ($statusMode === 'approved') ? 2 : 1;
 
+        // ソートのためのカラムと並び順を決定
+        if ($statusCode === 2) {
+            // 承認済み：承認が新しい順（降順）
+            $sortColumn = 'updated_at';
+            $sortOrder = 'desc';
+        } else {
+            // 承認待ち：申請が古い順（昇順）
+            $sortColumn = 'created_at';
+            $sortOrder = 'asc';
+        }
+
         // 管理者は「全ユーザー」の申請を取得する
         $requests = AttendanceCorrectRequest::with('user')
             ->where('status', $statusCode)
-            ->orderBy('created_at', 'desc')
+            ->orderBy($sortColumn, $sortOrder)
             ->get();
 
         return view('admin.attendance_request_list', [

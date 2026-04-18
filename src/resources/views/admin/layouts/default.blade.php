@@ -25,11 +25,12 @@
                         @auth
                             <li><a href="/admin/attendance/list" class="header__nav-link">勤怠一覧</a></li>
                             <li><a href="/admin/staff/list" class="header__nav-link">スタッフ一覧</a></li>
-                            <li><a href="{{ route('admin.attendance.requests') }}" class="header__nav-link">申請一覧</a></li>
+                            <li><a href="{{ route('attendance.requests') }}" class="header__nav-link">申請一覧</a></li>
                             <li>
                                 {{-- ログインしている時 --}}
                                 <form action="/logout" method="POST">
                                     @csrf
+                                    <input type="hidden" name="logout_type" value="admin">
                                     <button type="submit" class="header__nav-link">ログアウト</button>
                                 </form>
                             </li>

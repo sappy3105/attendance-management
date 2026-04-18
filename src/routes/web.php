@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use Laravel\Fortify\Http\Controllers\AuthenticatedSessionController;
 use App\Http\Middleware\StaffMiddleware;
 use App\Http\Middleware\AdminMiddleware;
+use App\Http\Middleware\RoleRedirectMiddleware;
 
 // トップページ（ログイン状態により分岐）
 Route::get('/', function () {
@@ -25,6 +26,12 @@ Route::post('/admin/login', [AuthenticatedSessionController::class, 'store']);
 // ログイン後のみアクセス可能なグループ
 Route::middleware('auth', 'verified')->group(function () {
 
+    // 申請一覧画面表示(管理者＆一般ユーザー)
+    Route::get('/stamp_correction_request/list', [AttendanceController::class, 'showRequestList'])
+        ->middleware(RoleRedirectMiddleware::class) // RoleRedirectMiddleware内で分岐
+        ->name('attendance.requests');
+
+    // 一般ユーザー用
     Route::middleware(StaffMiddleware::class)->group(function () {
         // 勤怠登録画面表示
         Route::get('/attendance', [AttendanceController::class, 'index'])->name('attendance.index');
@@ -51,16 +58,9 @@ Route::middleware('auth', 'verified')->group(function () {
         // 勤怠詳細の更新（修正申請）
         Route::post('/attendance/detail/{id}', [AttendanceController::class, 'updateDetail'])
             ->name('attendance.update');
-
-        // 申請一覧画面表示
-        Route::get('/stamp_correction_request/list', [AttendanceController::class, 'showRequestList'])->name('attendance.requests');
-
-        // 申請一覧からの確認用画面（動的セグメントを利用）←削除するかも
-        Route::get('/stamp-correction-request/approve/{attendance_correct_request_id}', [AttendanceController::class, 'showApprovalStatus'])
-            ->name('attendance.approve.status');
     });
 
-    // 管理者用
+    // 管理者用(URLに admin が入っているもの)
     Route::prefix('admin')->middleware(AdminMiddleware::class)->group(function () {
         // 勤怠一覧画面表示
         Route::get('/attendance/list', [AdminAttendanceController::class, 'list'])->name('admin.attendance.list');
@@ -77,18 +77,19 @@ Route::middleware('auth', 'verified')->group(function () {
         // スタッフ別勤怠一覧表示
         Route::get('/attendance/staff/{id}', [AdminAttendanceController::class, 'staffAttendance'])->name('admin.staff.attendance');
 
-        // 申請一覧（管理者用：全ユーザーの申請が見れる）
-        Route::get('/stamp_correction_request/list', [AdminAttendanceController::class, 'showRequestList'])->name('admin.attendance.requests');
+        // CSV出力
+        Route::get('/export', [AdminAttendanceController::class, 'export'])->name('admin.export');
+    });
 
-        // 修正申請承認画面の表示
+    // 管理者用（URLにadminなし）
+    Route::middleware(AdminMiddleware::class)->group(function () {
+
+        // 修正申請承認画面（URLから admin が消える！）
         Route::get('/stamp_correction_request/approve/{attendance_correct_request_id}', [AdminAttendanceController::class, 'showApprove'])
             ->name('admin.attendance.approve.show');
 
         // 承認処理
         Route::post('/stamp_correction_request/approve/{attendance_correct_request_id}', [AdminAttendanceController::class, 'approve'])
             ->name('admin.attendance.approve');
-
-        // CSV出力
-        Route::get('/export', [AdminAttendanceController::class, 'export'])->name('admin.export');
     });
 });

@@ -3,20 +3,18 @@
 namespace App\Http\Responses;
 
 use Laravel\Fortify\Contracts\LogoutResponse as LogoutResponseContract;
+use Illuminate\Support\Facades\Auth;
 
 class LogoutResponse implements LogoutResponseContract
 {
     public function toResponse($request)
     {
-        // ログアウトを実行した元のページのURLを取得
-        $referer = $request->headers->get('referer');
-
-        // URLに 'admin' が含まれている場合は管理者のログイン画面へ
-        if (str_contains($referer, '/admin')) {
+        // フォームから送られてきた'logout_type'を確認し、'admin'ならば管理者用ログインページへ
+        if ($request->input('logout_type') === 'admin') {
             return redirect()->route('admin.login');
         }
 
-        // それ以外はスタッフ用のログイン画面へ
+        // それ以外は一般ユーザー用のログイン画面へ
         return redirect('/login');
     }
 }
