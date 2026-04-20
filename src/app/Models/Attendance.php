@@ -41,11 +41,6 @@ class Attendance extends Model
         return $this->hasMany(AttendanceCorrectRequest::class);
     }
 
-    public function restCorrectRequests()
-    {
-        return $this->hasMany(RestCorrectRequest::class);
-    }
-
     /**
      * 休憩時間の合計を「分（数値）」で返す（計算用）
      */

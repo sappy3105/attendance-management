@@ -76,7 +76,7 @@ make build
 もし `make dev` でエラーが出る場合は、以下のコマンドを試してから再度ビルドしてください。
 
 ```bash
-npm install postcss-loader autoprefixer --save-dev
+docker-compose exec php npm install postcss-loader autoprefixer --save-dev
 ```
 
 ## 使用技術（実行環境）
@@ -99,7 +99,7 @@ npm install postcss-loader autoprefixer --save-dev
 **1. データの初期化**
 
 リポジトリをクローンし、環境構築が完了した後、以下のコマンドを実行してデータベースを最新の状態にします。  
-※初回シーディング直後の場合は、この作業はスキップしてください。
+※ `make init` 実行直後の場合は、この作業はスキップしてください。
 
 ```bash
 make fresh
@@ -133,19 +133,82 @@ make fresh
 - 過去30日分の勤怠実績: 土日を除く直近30日間の出勤・退勤データが全一般ユーザー分作成されます。
 
 - 修正申請のシミュレーション:
+  - 全勤怠データのうち 10% に対して、既に修正申請が行われた状態を再現しています。
 
-   - 全勤怠データのうち 10% に対して、既に修正申請が行われた状態を再現しています。
-
-   - それらの申請のうち半分は 「承認待ち」、残り半分は 「承認済み」 となっており、管理者・ユーザーそれぞれの画面で異なる状態の申請リストを確認可能です。
+  - それらの申請のうち半分は 「承認待ち」、残り半分は 「承認済み」 となっており、管理者・ユーザーそれぞれの画面で異なる状態の申請リストを確認可能です。
 
 ## テーブル仕様書（概要）
 
-| テーブル名 | 説明 |
-| :--- | :--- |
-| users | 利用者（一般ユーザー・管理者ユーザー）の認証・属性情報を管理 |
-| attendances | 日ごとの出勤・退勤時間、および現在の勤務ステータスを記録 |
-| rests | 勤務中の休憩開始・終了時間を記録（1日複数回対応） |
-| attendance_correct_requests | 勤怠修正申請の履歴と承認ステータスを管理 |
-| rest_correct_requests | 勤怠修正申請に紐づく休憩修正申請の履歴 |
+| テーブル名                  | 説明                                                         |
+| :-------------------------- | :----------------------------------------------------------- |
+| users                       | 利用者（一般ユーザー・管理者ユーザー）の認証・属性情報を管理 |
+| attendances                 | 日ごとの出勤・退勤時間、および現在の勤務ステータスを記録     |
+| rests                       | 勤務中の休憩開始・終了時間を記録（1日複数回対応）            |
+| attendance_correct_requests | 勤怠修正申請の履歴と承認ステータスを管理                     |
+| rest_correct_requests       | 勤怠修正申請に紐づく休憩修正申請の履歴                       |
 
 ## ER 図
+
+```mermaid
+erDiagram
+users ||--o{ attendances : "記録"
+users ||--o{ attendance_correct_requests : "申請者"
+attendances ||--o{ rests : "休憩記録"
+attendances ||--o{ attendance_correct_requests : "修正元"
+attendance_correct_requests ||--o{ rest_correct_requests : "休憩修正申請"
+
+users {
+   unsigned_bigint id PK
+   varchar name
+   varchar email UK
+   timestamp email_verified_at
+   varchar password
+   tinyint role "1:スタッフ, 2:管理者"
+   varchar remember_token
+   timestamp created_at
+   timestamp updated_at
+}
+
+attendances {
+   unsigned_bigint id PK
+   unsigned_bigint user_id FK
+   date date
+   tinyint status "1:出勤中, 2:休憩中, 3:退勤済"
+   time check_in
+   time check_out
+   text remarks
+   timestamp created_at
+   timestamp updated_at
+}
+
+rests {
+   unsigned_bigint id PK
+   unsigned_bigint attendance_id FK
+   time break_start
+   time break_end
+   timestamp created_at
+   timestamp updated_at
+}
+
+attendance_correct_requests {
+   unsigned_bigint id PK
+   unsigned_bigint attendance_id FK
+   unsigned_bigint user_id FK
+   date date
+   time check_in
+   time check_out
+   text remarks
+   tinyint status "1:承認待ち, 2:承認済み"
+   timestamp created_at
+   timestamp updated_at
+}
+
+rest_correct_requests {
+   unsigned_bigint id PK
+   unsigned_bigint attendance_correct_request_id FK
+   time break_start
+   time break_end
+   timestamp created_at
+   timestamp updated_at
+}
+```
