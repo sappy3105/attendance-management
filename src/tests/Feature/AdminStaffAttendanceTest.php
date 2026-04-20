@@ -79,7 +79,7 @@ class AdminStaffAttendanceTest extends TestCase
 
         // 勤怠情報を確認
         $response->assertStatus(200);
-        $response->assertSee($this->staff->name . 'の勤怠');
+        $response->assertSee($this->staff->name . 'さんの勤怠');
         $response->assertSee('2026/04'); // カレンダー選択部分
         $response->assertSeeInOrder([
             $date->isoFormat('MM/DD(ddd)'),

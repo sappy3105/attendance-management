@@ -54,7 +54,7 @@ class AdminAttendanceCorrectRequestTest extends TestCase
         }
 
         // 申請一覧画面へアクセス
-        $response = $this->actingAs($this->admin)->get(route('admin.attendance.requests', ['status' => 'pending']));
+        $response = $this->actingAs($this->admin)->get(route('attendance.requests', ['status' => 'pending']));
         $response->assertStatus(200);
 
         // 各ユーザーの状態、名前、対象日時、申請理由が画面に表示されているか確認
@@ -96,7 +96,7 @@ class AdminAttendanceCorrectRequestTest extends TestCase
         }
 
         // 承認済み画面へアクセス
-        $response = $this->actingAs($this->admin)->get(route('admin.attendance.requests', ['status' => 'approved']));
+        $response = $this->actingAs($this->admin)->get(route('attendance.requests', ['status' => 'approved']));
         $response->assertStatus(200);
 
         // 各ユーザーの状態、名前、対象日時、申請理由が画面に表示されているか確認

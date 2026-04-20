@@ -207,7 +207,7 @@ class UserAttendanceUpdateTest extends TestCase
         $admin = User::factory()->admin()->create();
 
         // 1. 管理者として「申請一覧画面」を確認
-        $response = $this->actingAs($admin)->get(route('admin.attendance.requests'));
+        $response = $this->actingAs($admin)->get(route('attendance.requests'));
         $response->assertStatus(200);
         $response->assertSeeInOrder([
             '承認待ち',
