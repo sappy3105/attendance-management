@@ -13,14 +13,9 @@ return new class extends Migration
     {
         Schema::create('rests', function (Blueprint $table) {
             $table->id();
-
-            // どの勤怠データに紐づく休憩か
             $table->foreignId('attendance_id')->constrained()->cascadeOnDelete();
-
-            // 休憩開始・終了時間
-            $table->time('break_start');
-            $table->time('break_end')->nullable(); // 休憩中は null になるため
-
+            $table->time('break_start'); // 休憩開始時間
+            $table->time('break_end')->nullable(); // 休憩終了時間
             $table->timestamps();
         });
     }

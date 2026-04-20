@@ -290,15 +290,4 @@ class AttendanceController extends Controller
             'status'   => $statusMode,
         ]);
     }
-
-    /** 修正申請確認画面の表示　←削除するかも */
-    public function showApprovalStatus($attendance_correct_request_id)
-    {
-        // 申請データを取得（リレーションでユーザーと休憩申請も取得）
-        $attendanceCorrectRequest = Auth::user()->attendanceCorrectRequests()
-            ->with(['user', 'restCorrectRequests'])
-            ->findOrFail($attendance_correct_request_id);
-
-        return view('attendance_approval_status', compact('attendanceCorrectRequest'));
-    }
 }

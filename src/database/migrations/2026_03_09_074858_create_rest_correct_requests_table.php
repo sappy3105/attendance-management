@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('rest_correct_requests', function (Blueprint $table) {
             $table->id();
-            // どの「修正申請」に紐づく休憩データか
             $table->foreignId('attendance_correct_request_id')->constrained()->cascadeOnDelete();
 
             // 修正後の休憩開始・終了時間

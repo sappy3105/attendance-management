@@ -13,22 +13,12 @@ return new class extends Migration
     {
         Schema::create('attendances', function (Blueprint $table) {
             $table->id();
-            // 誰の勤怠か
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-
-            // 日付（勤怠一覧や月次表示の検索に使用）
-            $table->date('date');
-
-            // ステータス管理（1:出勤中, 2:休憩中, 3:退勤済）
-            $table->tinyInteger('status')->default(1)->comment('1:出勤中, 2:休憩中, 3:退勤済');
-
-            // 出勤・退勤時間（秒単位まで保持できる time 型が扱いやすいです）
-            $table->time('check_in')->nullable();
-            $table->time('check_out')->nullable();
-
-            // 備考（管理者修正時や申請時に必要）
-            $table->text('remarks')->nullable();
-
+            $table->date('date'); // 日付（勤怠一覧や月次表示の検索に使用）
+            $table->tinyInteger('status')->default(1)->comment('1:出勤中, 2:休憩中, 3:退勤済'); // ステータス管理
+            $table->time('check_in')->nullable(); // 出勤時間
+            $table->time('check_out')->nullable(); // 退勤時間
+            $table->text('remarks')->nullable(); // 備考（管理者修正時や申請時に必要）
             $table->timestamps();
         });
     }
