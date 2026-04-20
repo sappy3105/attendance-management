@@ -25,10 +25,6 @@
 `.env`ファイルに以下の環境変数を追加してください。
 
 ```env
-DB_CONNECTION=mysql
-DB_HOST=mysql
-DB_PORT=3306
-DB_DATABASE=laravel_db
 DB_USERNAME=laravel_user
 DB_PASSWORD=laravel_pass
 ```
@@ -51,8 +47,6 @@ DB_PASSWORD=laravel_pass
 プロジェクト直下の `.env` ファイルに、確認した値を反映させてください。
 
 ```env
-MAIL_HOST=sandbox.smtp.mailtrap.io
-MAIL_PORT=2525
 MAIL_USERNAME=確認したユーザー名
 MAIL_PASSWORD=確認したパスワード
 MAIL_DASHBOARD_URL=「My Sandbox」ページのURL
@@ -76,10 +70,10 @@ make cache
 make dev
 
 # 本番用（ファイルを最適化・圧縮したい場合）
-npm run production
+make build
 ```
 
-もし `npm run dev` でエラーが出る場合は、以下のコマンドを試してから再度ビルドしてください。
+もし `make dev` でエラーが出る場合は、以下のコマンドを試してから再度ビルドしてください。
 
 ```bash
 npm install postcss-loader autoprefixer --save-dev
@@ -99,7 +93,7 @@ npm install postcss-loader autoprefixer --save-dev
 
 ## 動作確認ガイド（動作確認用データの構成）
 
-本プロジェクトでは、管理者ユーザー1名および一般ユーザー6名、その一般ユーザー6名分の昨日までの30日間の勤怠データを投入しています。   
+本プロジェクトでは、管理者ユーザー1名および一般ユーザー6名、その一般ユーザー6名分の昨日までの30日間の勤怠データを投入しています。  
 セットアップ完了後、以下の動作確認用データを使用して各機能を確認いただけます。
 
 **1. データの初期化**
@@ -108,8 +102,7 @@ npm install postcss-loader autoprefixer --save-dev
 ※初回シーディング直後の場合は、この作業はスキップしてください。
 
 ```bash
-docker-compose exec php bash
-php artisan migrate:fresh --seed
+make fresh
 ```
 
 **2. 動作確認用アカウント**
@@ -118,24 +111,41 @@ php artisan migrate:fresh --seed
 
 **◇管理者ユーザー登録情報**
 
-| ID  | ユーザー名      | メールアドレス    | パスワード |
-| :-: | :------------- | :--------------- | :-------- |
+| ID  | ユーザー名  | メールアドレス    | パスワード |
+| :-: | :---------- | :---------------- | :--------- |
 |  1  | 管理者 太郎 | admin@example.com | admin_pass |
 
 **◇一般ユーザー登録情報**
 
-| ID  | ユーザー名      | メールアドレス    | パスワード |
-| :-: | :------------- |:---------------- | :-------- |
-|  2  | 田中 一郎 | staff1@example.com | staff_pass |
-|  3  | 鈴木 二郎 | staff2@example.com | staff_pass |
-|  4  | 高橋 三郎 | staff3@example.com | staff_pass |
-|  5  | 渡辺 四郎 | staff4@example.com | staff_pass |
-|  6  | 伊藤 五郎 | staff5@example.com | staff_pass |
-|  7  | 山本 六郎 | staff6@example.com | staff_pass |
+| ID  | ユーザー名 | メールアドレス     | パスワード |
+| :-: | :--------- | :----------------- | :--------- |
+|  2  | 田中 一郎  | staff1@example.com | staff_pass |
+|  3  | 鈴木 二郎  | staff2@example.com | staff_pass |
+|  4  | 高橋 三郎  | staff3@example.com | staff_pass |
+|  5  | 渡辺 四郎  | staff4@example.com | staff_pass |
+|  6  | 伊藤 五郎  | staff5@example.com | staff_pass |
+|  7  | 山本 六郎  | staff6@example.com | staff_pass |
 
-**3. 登録勤怠情報**
+**3. 自動生成される勤怠データの構成**
 
-シーディングした日の前日までの30日間（土日除く）の勤怠を登録しています。  
-また、登録した勤怠の10％に、勤怠修正申請データを作成しています。さらに、勤怠修正申請データの50％の確率で承認待ちデータと承認済みデータをそれぞれ作成しています。
+ログイン後、すぐに機能を確認いただけるよう、シーディングによって以下のデータが自動生成されます。
+
+- 過去30日分の勤怠実績: 土日を除く直近30日間の出勤・退勤データが全一般ユーザー分作成されます。
+
+- 修正申請のシミュレーション:
+
+   - 全勤怠データのうち 10% に対して、既に修正申請が行われた状態を再現しています。
+
+   - それらの申請のうち半分は 「承認待ち」、残り半分は 「承認済み」 となっており、管理者・ユーザーそれぞれの画面で異なる状態の申請リストを確認可能です。
+
+## テーブル仕様書（概要）
+
+| テーブル名 | 説明 |
+| :--- | :--- |
+| users | 利用者（一般ユーザー・管理者ユーザー）の認証・属性情報を管理 |
+| attendances | 日ごとの出勤・退勤時間、および現在の勤務ステータスを記録 |
+| rests | 勤務中の休憩開始・終了時間を記録（1日複数回対応） |
+| attendance_correct_requests | 勤怠修正申請の履歴と承認ステータスを管理 |
+| rest_correct_requests | 勤怠修正申請に紐づく休憩修正申請の履歴 |
 
 ## ER 図

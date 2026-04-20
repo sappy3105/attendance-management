@@ -1,8 +1,8 @@
 init:
 	docker-compose up -d --build
-	docker-compose exec php composer install
-	npm install
 	docker-compose exec php cp .env.example .env
+	docker-compose exec php composer install
+	docker-compose exec php npm install
 	docker-compose exec php php artisan key:generate
 	@make fresh
 
@@ -28,6 +28,9 @@ stop:
 
 dev:
 	docker-compose exec php npm run dev
+
+build:
+	docker-compose exec php npm run build
 
 sh:
 	docker-compose exec php bash
