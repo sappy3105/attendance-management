@@ -43,7 +43,6 @@ class UserFactory extends Factory
         ]);
     }
 
-    // ↓後ほど削除するかも
     /**
      * Indicate that the model's email address should be unverified.
      *

@@ -21,18 +21,12 @@ class AdminAttendanceController extends Controller
         $dateStr = $request->query('date', Carbon::today()->format('Y-m-d'));
         $currentDate = Carbon::parse($dateStr);
 
-        // dd([
-        //     'search_date' => $dateStr,
-        //     'db_sample' => \App\Models\Attendance::first()?->date
-        // ]);
-
-        // 5. 全一般ユーザーを取得し、指定日の勤怠と休憩を一括取得（Eager Load）
+        // 2. 全一般ユーザーを取得し、指定日の勤怠と休憩を一括取得
         $users = User::where('role', 1)
             ->with(['attendances' => function ($query) use ($dateStr) {
                 $query->whereDate('date', $dateStr);
             }])
             ->get();
-        // dd($users->toArray());
 
         return view('admin.attendance_list', [
             'users'       => $users,
@@ -56,18 +50,17 @@ class AdminAttendanceController extends Controller
             );
             $attendance->load('user');
         } else {
-            // $attendance = Attendance::with(['user', 'rests'])->findOrFail($id);
             $attendance = Attendance::with(['user', 'rests', 'correctRequests.restCorrectRequests'])->findOrFail($id);
         }
 
-        // 2. 常にレコードが存在するので、findOrFailなどは不要
+        // 2. この勤怠のユーザーと日付を変数に入れる
         $user = $attendance->user;
         $date = $attendance->date;
 
         // 3. この勤怠に対して「承認待ち」の修正申請があるか確認
         $pendingRequest = $attendance->correctRequests()
             ->where('status', 1) // 1:承認待ち
-            // ->with('restCorrectRequests') // 休憩申請も一緒に取得
+            ->with('restCorrectRequests') // 休憩申請も一緒に取得
             ->first();
 
         // 承認待ちがあれば、その申請内容を表示データとして使う
@@ -81,10 +74,10 @@ class AdminAttendanceController extends Controller
             'remarks'   => $source->remarks,
         ];
 
-        // 4. 休憩データの取得
+        // 5. 休憩データの取得
         $rests = $isPending ? $pendingRequest->restCorrectRequests : $attendance->rests;
 
-        // 5. ビューの表示
+        // 6. ビューの表示
         return view('admin.attendance_detail', [
             'attendance'  => $attendance,
             'user'        => $user,
@@ -98,11 +91,10 @@ class AdminAttendanceController extends Controller
     /** スタッフ一覧画面（管理者） */
     public function staffList()
     {
-        // roleが1（一般スタッフ）のユーザーのみ取得
+        // roleが1（一般）のユーザーのみ取得
         $users = User::where('role', 1)
             ->orderBy('id', 'asc')
             ->get();
-
 
         return view('admin.staff_list', compact('users'));
     }
@@ -162,7 +154,6 @@ class AdminAttendanceController extends Controller
             ]);
 
             // 2. restsテーブル（休憩）の更新
-            // 管理者の修正時は、一度既存の休憩を削除して作り直すのが最も確実でシンプルな方法です
             $attendance->rests()->delete();
 
             if ($request->has('break_start')) {
@@ -216,7 +207,7 @@ class AdminAttendanceController extends Controller
     /** 修正申請承認画面の表示 */
     public function showApprove($attendance_correct_request_id)
     {
-        // 申請データを取得（リレーションでユーザーと休憩申請も取得）
+        // 申請データを取得（ユーザーと休憩申請も一緒に取得）
         $correctRequest = AttendanceCorrectRequest::with(['user', 'restCorrectRequests'])
             ->findOrFail($attendance_correct_request_id);
 
@@ -226,11 +217,11 @@ class AdminAttendanceController extends Controller
     /** 承認処理の実行 */
     public function approve($attendance_correct_request_id)
     {
-        // 1. 申請データを取得（リレーションで勤怠本体と休憩申請も一括取得）
+        // 1. 申請データを取得（勤怠本体と休憩申請も一括取得）
         $correctRequest = AttendanceCorrectRequest::with(['restCorrectRequests'])
             ->findOrFail($attendance_correct_request_id);
 
-        // すでに承認済みの場合は何もしない（またはエラーを出す）
+        // すでに承認済みの場合は何もしない
         if ($correctRequest->status === 2) {
             return redirect()->back();
         }
@@ -245,7 +236,6 @@ class AdminAttendanceController extends Controller
             ]);
 
             // 3. 本番の休憩レコード(rests)を更新
-            // 一度削除して、申請された内容で作り直すのが確実です
             $attendance->rests()->delete();
             foreach ($correctRequest->restCorrectRequests as $restRequest) {
                 $attendance->rests()->create([
@@ -254,7 +244,7 @@ class AdminAttendanceController extends Controller
                 ]);
             }
 
-            // 4. 申請ステータスを「承認済み(2)」に変更
+            // 4. 申請ステータスを承認済み(2)に変更
             $correctRequest->update(['status' => 2]);
         });
 
@@ -269,11 +259,11 @@ class AdminAttendanceController extends Controller
         $monthString = $request->input('month', now()->format('Y-m'));
         $user = User::where('role', 1)->findOrFail($userId);
 
-        // 1. その月の開始日と終了日を取得
+        // 2. その月の開始日と終了日を取得
         $startOfMonth = Carbon::parse($monthString)->startOfMonth();
         $endOfMonth = Carbon::parse($monthString)->endOfMonth();
 
-        // 2. 指定期間の勤怠データを取得し、日付をキーにしたコレクションにする
+        // 3. 指定期間の勤怠データを取得し、日付をキーにしたコレクションにする
         $attendances = Attendance::with('user', 'rests')
             ->where('user_id', $userId)
             ->whereBetween('date', [$startOfMonth, $endOfMonth])
@@ -286,7 +276,7 @@ class AdminAttendanceController extends Controller
         $csvData = [];
         $csvData[] = $csvHeader;
 
-        // 3. 1日から末日まで1日ずつループを回す
+        // 4. 1日から末日まで1日ずつループを回す
         $period = CarbonPeriod::create($startOfMonth, $endOfMonth);
 
         foreach ($period as $date) {
@@ -323,12 +313,12 @@ class AdminAttendanceController extends Controller
 
         $filename = 'attendance_' . $user->name . '_' . str_replace('-', '', $monthString) . '.csv';
 
-        // 3. ファイル書き出し処理
+        // 5. ファイル書き出し処理
         $callback = function () use ($csvData) {
             $file = fopen('php://output', 'w');
             fputs($file, "\xEF\xBB\xBF"); // 文字化け対策(BOM)
 
-            // 2. データを1行ずつ取り出して書き込む
+            // 6. データを1行ずつ取り出して書き込む
             foreach ($csvData as $row) {
                 // $row が配列であることを確認して書き込む
                 fputcsv($file, $row);
@@ -336,7 +326,7 @@ class AdminAttendanceController extends Controller
             fclose($file);
         };
 
-        // 4. レスポンスヘッダーの設定
+        // 7. レスポンスヘッダーの設定
         $headers = [
             "Content-type" => "text/csv", //CSVデータという宣言
             "Content-Disposition" => "attachment; filename=" . rawurlencode($filename), //画面に表示せず、「添付ファイル（attachment）」として扱い、指定のファイル名(日本語を認識できる形）で保存
