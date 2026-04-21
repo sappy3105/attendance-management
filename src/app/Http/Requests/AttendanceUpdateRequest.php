@@ -91,7 +91,6 @@ class AttendanceUpdateRequest extends FormRequest
                 $cStart = $start ? Carbon::parse($start) : null;
                 $cEnd   = $end ? Carbon::parse($end) : null;
 
-
                 // 2. 休憩時間の入力必須チェック
                 if (empty($start) && !empty($end)) {
                     $validator->errors()->add("break_start.{$index}", '休憩開始時間を入力してください');
@@ -126,7 +125,7 @@ class AttendanceUpdateRequest extends FormRequest
                 }
             }
 
-            //休憩時間同士の比較
+            //休憩時間同士の比較、休憩時間の重複に関するバリデーション
             // 有効な休憩時間をペアとして抽出し、配列にする
             $validRests = [];
             foreach ($breakStarts as $index => $start) {

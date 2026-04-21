@@ -23,8 +23,6 @@ class RegisterRequest extends FormRequest
     public function rules(): array
     {
         // パスワードが「入力済み」かつ「8文字以上」か判定
-        $password = $this->input('password');
-        // $isPasswordValid = !empty($password) && mb_strlen($password) >= 8;
         $isPasswordValid = !Validator::make($this->all(), ['password' => 'required|min:8'])->fails();
 
         return [

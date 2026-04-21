@@ -18,7 +18,7 @@ class RoleRedirectMiddleware
     {
         $user = auth()->user();
 
-        // 管理者の場合 → AdminAttendanceController のメソッドを呼ぶように仕向ける
+        // 管理者の場合 → AdminAttendanceController のメソッドを呼ぶ
         if ($user && $user->role === 2) {
             $result = app(AdminAttendanceController::class)->showRequestList($request);
 
