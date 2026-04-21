@@ -21,7 +21,7 @@
         </div>
 
         {{-- 現在の時刻 --}}
-        <div class="attendance__time">
+        <div class="attendance__time" id="current-time">
             {{ now()->format('H:i') }}
         </div>
 
@@ -63,4 +63,21 @@
             @endif
         </div>
     </div>
+
+    <script>
+        function updateClock() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+
+            // HTML内の id="current-time" と書かれた場所を探して、中身を「時:分」に書き換える
+            document.getElementById('current-time').textContent = `${hours}:${minutes}`;
+        }
+
+        // 1秒（1000ミリ秒）ごとにupdateClock関数を実行
+        setInterval(updateClock, 1000);
+
+        // ページを開いた瞬間に1回目を実行する
+        updateClock();
+    </script>
 @endsection
