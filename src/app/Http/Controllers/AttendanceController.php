@@ -106,7 +106,7 @@ class AttendanceController extends Controller
         $attendance = $user->attendances()->whereDate('date', $today)->first();
 
         if ($attendance && $attendance->status === 1) {
-            // 退勤時刻を保存し、ステータスを「4: 退勤済」に更新
+            // 退勤時刻を保存し、ステータスを「退勤済」に更新
             $attendance->update([
                 'check_out' => Carbon::now()->format('H:i:s'),
                 'status'    => 3, // 3: 退勤済
@@ -157,7 +157,7 @@ class AttendanceController extends Controller
             $date = $request->query('date');
             $attendance = Attendance::firstOrCreate(
                 ['user_id' => $user->id, 'date' => $date],
-                ['status' => 3] // 一般ユーザーも、未打刻の過去日は「退勤済み（勤務終了）」扱いで枠を作る
+                ['status' => 3] // 一般ユーザーも、未打刻の過去日は「退勤済み」扱いで枠を作る
             );
         } else {
             // 2. IDがある場合は通常取得（他人のデータを見れないようuser_idでガード）
@@ -208,6 +208,7 @@ class AttendanceController extends Controller
             ->where('status', 1)
             ->exists();
 
+        // 「二重申請ガード」
         if ($existsPending) {
             return redirect()->back()
                 ->withInput() // 入力内容を保持
@@ -275,7 +276,7 @@ class AttendanceController extends Controller
         if ($statusCode === 2) {
             $query->whereIn('id', function ($subQuery) use ($user) {
                 $subQuery->select(DB::raw('MAX(id)')) // 「IDの最大値（＝最新の申請ID）」を選択
-                    ->from('attendance_correct_requests') // 検索対象のテーブルは「修正申請テーブル」
+                    ->from('attendance_correct_requests') // 「修正申請テーブル」を検索
                     ->where('user_id', $user->id) // 「ログインしている自分自身のデータ」に限定
                     ->where('status', 2) // かつ「承認済み（statusが2）」のデータのみを対象にする
                     ->groupBy('attendance_id'); // 勤務日（attendance_id）が同じ申請をグループ化
