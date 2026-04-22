@@ -313,7 +313,7 @@ class UserAttendanceUpdateTest extends TestCase
         $correctRequest = AttendanceCorrectRequest::where('remarks', '管理者承認テスト')->first();
 
         // 管理者を作成
-        $admin = User::factory()->admin()->create();
+        $admin = User::factory()->admin()->create(['role' => 2]);
 
         // 管理者が承認処理を実行
         $this->actingAs($admin)->post(route('admin.attendance.approve', [
