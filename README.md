@@ -151,11 +151,11 @@ make fresh
 
 ```mermaid
 erDiagram
-users ||--o{ attendances : "記録"
-users ||--o{ attendance_correct_requests : "申請者"
-attendances ||--o{ rests : "休憩記録"
-attendances ||--o{ attendance_correct_requests : "修正元"
-attendance_correct_requests ||--o{ rest_correct_requests : "休憩修正申請"
+users ||--o{ attendances : ""
+users ||--o{ attendance_correct_requests : ""
+attendances ||--o{ rests : ""
+attendances ||--o{ attendance_correct_requests : ""
+attendance_correct_requests ||--o{ rest_correct_requests : ""
 
 users {
    unsigned_bigint id PK
