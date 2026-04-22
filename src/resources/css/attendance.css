@@ -4,7 +4,7 @@
     text-align: center;
 }
 
-/* ステータスラベル（勤務外、出勤中など） */
+/* ステータス表示（勤務外、出勤中など） */
 .attendance__status {
     display: inline-block;
     background-color: #ccc;

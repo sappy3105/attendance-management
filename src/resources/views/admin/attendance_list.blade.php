@@ -2,10 +2,10 @@
 
 @section('content')
     <div class="attendance-list">
-        {{-- 要件：現在の日付を表示 --}}
+        {{-- 現在の日付を表示 --}}
         <h1 class="attendance-list__heading">{{ $currentDate->format('Y年m月d日') }}の勤怠</h1>
 
-        {{-- 日付変更機能 --}}
+        {{-- 日付のページネーション --}}
         <div class="attendance-list__nav">
             <a href="{{ route('admin.attendance.list', ['date' => $prevDate]) }}" class="nav-button">← 前日</a>
 

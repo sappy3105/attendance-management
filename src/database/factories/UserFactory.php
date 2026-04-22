@@ -38,7 +38,7 @@ class UserFactory extends Factory
      */
     public function admin(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state([
             'role' => 2,
         ]);
     }
@@ -49,7 +49,7 @@ class UserFactory extends Factory
      */
     public function unverified(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state([
             'email_verified_at' => null,
         ]);
     }

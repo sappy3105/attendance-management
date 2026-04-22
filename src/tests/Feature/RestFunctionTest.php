@@ -178,7 +178,7 @@ class RestFunctionTest extends TestCase
             '<td>09:00</td>',
             '<td>',
             '</td>',
-            '<td>1:00</td>' // getTotalRestTime() の返り値が 01:00 であると想定
+            '<td>1:00</td>' // getTotalRestTime() の返り値が 1:00 であると想定
         ]);
     }
 }

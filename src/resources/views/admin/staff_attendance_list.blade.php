@@ -1,11 +1,11 @@
-@extends('admin.layouts.default') {{-- 管理者用レイアウト --}}
+@extends('admin.layouts.default')
 
 @section('content')
-    <div class="attendance-list"> {{-- 一般ユーザーと同じクラス名 --}}
+    <div class="attendance-list">
         <h1 class="attendance-list__heading">{{ $user->name }}さんの勤怠</h1>
 
         <div class="attendance-list__nav">
-            {{-- URLにスタッフIDを含めるよう修正 --}}
+            {{-- URLにスタッフIDを含める --}}
             <a href="{{ route('admin.staff.attendance', ['id' => $user->id, 'month' => $prevMonth]) }}" class="nav-button">←
                 前月</a>
 
@@ -22,7 +22,7 @@
                 class="nav-button">翌月 →</a>
         </div>
 
-        <table class="attendance-table"> {{-- 一般ユーザーと同じクラス名 --}}
+        <table class="attendance-table">
             <thead>
                 <tr>
                     <th>日付</th>
@@ -71,7 +71,7 @@
             </tbody>
         </table>
         <div class="attendance-list__actions">
-            {{-- 通常時：修正ボタンを表示 --}}
+            {{-- 修正ボタンを表示 --}}
             <a href="{{ route('admin.export', ['id' => $user->id, 'month' => $currentMonth->format('Y-m')]) }}"
                 class="attendance-list__export-link">
                 CSV出力

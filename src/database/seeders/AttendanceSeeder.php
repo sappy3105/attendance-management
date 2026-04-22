@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\User;
 use App\Models\Attendance;
@@ -19,7 +18,6 @@ class AttendanceSeeder extends Seeder
     public function run(): void
     {
         // 1. 対象となる全スタッフ（role=1）を取得
-        // メールアドレスで固定したい場合は whereIn(['staff1@example.com', ...]) でもOK
         $staffUsers = User::where('role', '1')->get();
 
         // 2. 作成したい期間を設定
@@ -30,7 +28,7 @@ class AttendanceSeeder extends Seeder
             // 各ユーザーごとに1日ずつループ
             for ($date = $startDate->copy(); $date <= $endDate; $date->addDay()) {
 
-                // 土日はデータを作らない場合は以下を有効化
+                // 土日はデータを作らない
                 if ($date->isWeekend()) continue;
 
                 // 3. 勤怠レコードの作成（ユーザーIDと日付のペアで重複チェック）
@@ -43,12 +41,11 @@ class AttendanceSeeder extends Seeder
                         'check_in'  => '09:00:00',
                         'check_out' => '18:00:00',
                         'status'    => 3, //退勤済み
-                        // 'remarks'   => '通常の勤務',
                     ]
                 );
 
                 // 4. 休憩データの作成
-                // 1日1回の休憩（12:00-13:00）を想定
+                // 1日1回の休憩（12:00-13:00）を設定
                 Rest::updateOrCreate(
                     [
                         'attendance_id' => $attendance->id,

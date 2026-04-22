@@ -11,6 +11,7 @@ class LoginTest extends TestCase
     use RefreshDatabase;
 
     /**
+     * 認証機能（一般ユーザー）
      * 2-0: ログイン画面が正しく表示されるか
      */
 
@@ -80,6 +81,7 @@ class LoginTest extends TestCase
 
 
     /**
+     * 認証機能（管理者）
      * 3-0: ログイン画面が正しく表示されるか
      */
 

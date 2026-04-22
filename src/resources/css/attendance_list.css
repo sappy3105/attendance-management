@@ -39,7 +39,6 @@
     display: flex;
     align-items: center;
     cursor: pointer;
-    /* padding: 5px 10px; */
 }
 
 .hidden-month-input {

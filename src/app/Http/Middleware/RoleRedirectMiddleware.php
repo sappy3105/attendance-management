@@ -6,6 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use App\Http\Controllers\AdminAttendanceController;
+use Illuminate\Contracts\Support\Responsable;
 
 class RoleRedirectMiddleware
 {
@@ -16,13 +17,20 @@ class RoleRedirectMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
+        // 1. 現在の認証ユーザーを取得
         $user = auth()->user();
 
         // 管理者の場合 → AdminAttendanceController のメソッドを呼ぶ
-        if ($user && $user->role === 2) {
+        if ($user && $user->role === 2 && $request->routeIs('attendance.requests')) {
+            // 管理者用コントローラのメソッドを実行
             $result = app(AdminAttendanceController::class)->showRequestList($request);
 
-            // もし戻り値が View なら response 化する
+            // 戻り値が View や JsonResource などの場合、Response オブジェクトに変換
+            if ($result instanceof Responsable) {
+                return $result->toResponse($request);
+            }
+
+            // それ以外（文字列など）の場合は response() で包む
             return response($result);
         }
 

@@ -1,18 +1,15 @@
 /* スタッフ別勤怠一覧 */
-/* 日付選択 */
 /* 年月選択カレンダー */
 .date-picker {
     position: relative;
     display: flex;
     align-items: center;
     cursor: pointer;
-    /* padding: 5px 10px; */
 }
 
 .hidden-date-input {
     position: absolute;
-    width: 1px;
-    /* 完全に消すと動作しないブラウザがあるため、1pxだけ残して透明にする */
+    width: 1px; /* 完全に消すと動作しないブラウザがあるため、1pxだけ残して透明にする */
     height: 1px;
     opacity: 0;
     pointer-events: none;
@@ -26,11 +23,32 @@
     pointer-events: none;
 }
 
-/* テーブル内の「詳細」文字を要件通り太字に */
+/* テーブル内の「詳細」文字を太字に */
 .attendance-table__detail-link {
     color: #000;
     font-weight: bold;
     text-decoration: none;
+}
+
+/* CSV出力ボタン */
+.attendance-list__actions {
+    margin-top: 30px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.attendance-list__export-link {
+    background-color: #000;
+    color: #fff;
+    border: none;
+    padding: 10px 40px;
+    font-size: 18px;
+    letter-spacing: 3px;
+    text-indent: 3px;
+    border-radius: 5px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: opacity 0.2s;
 }
 
 /* スタッフ一覧専用スタイル */
@@ -104,23 +122,16 @@
     cursor: pointer;
 }
 
-/* CSV出力ボタン */
-.attendance-list__actions {
-    margin-top: 30px;
-    display: flex;
-    justify-content: flex-end;
-}
-
-.attendance-list__export-link {
-    background-color: #000;
+/* 修正申請承認画面用の承認済みボタン */
+.attendance-detail__approved-label {
+    display: inline-block; /* テキスト要素をボタンと同じ振る舞いに */
+    background-color: #606060;
     color: #fff;
-    border: none;
-    padding: 10px 40px;
+    padding: 10px 20px;
     font-size: 18px;
     letter-spacing: 3px;
     text-indent: 3px;
     border-radius: 5px;
-    text-decoration: none;
-    cursor: pointer;
-    transition: opacity 0.2s;
+    text-align: center;
+    box-sizing: border-box;
 }

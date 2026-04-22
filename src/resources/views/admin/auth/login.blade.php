@@ -1,7 +1,7 @@
 @extends('admin.layouts.default', ['mainClass' => 'main--white'])
 
 @section('content')
-    <div class="login-form__content"> {{-- 共通のスタイルを適用 --}}
+    <div class="login-form__content">
         <h1 class="login-form__heading">管理者ログイン</h1>
 
         <form action="{{ route('admin.login') }}" method="post" novalidate>

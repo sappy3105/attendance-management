@@ -15,7 +15,7 @@ class RegisterResponse implements RegisterResponseContract
             return redirect()->route('verification.notice');
         }
 
-        // すでに認証済みならプロフィールへ
-        return redirect()->route('profile.edit');
+        // すでに認証済みなら打刻画面へ
+        return redirect()->route('attendance.index');
     }
 }

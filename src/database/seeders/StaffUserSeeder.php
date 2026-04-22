@@ -2,11 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
-use Faker\Factory as Faker;
 
 class StaffUserSeeder extends Seeder
 {
@@ -25,7 +23,7 @@ class StaffUserSeeder extends Seeder
                     'name' => $name,
                     'password' => Hash::make('staff_pass'),
                     'role' => '1', // 1: スタッフ
-                    'email_verified_at' => now(), // テスト用にメール認証済みにしておく
+                    'email_verified_at' => now(), // メール認証済みに
                 ]
             );
         }

@@ -1,7 +1,7 @@
 @extends('layouts.default', ['mainClass' => 'main--white'])
 
 @section('content')
-    <div class="login-form__content"> {{-- 共通のスタイルを適用 --}}
+    <div class="login-form__content">
         <h1 class="login-form__heading">ログイン</h1>
 
         <form action="{{ route('login') }}" method="post" novalidate>

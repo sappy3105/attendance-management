@@ -24,7 +24,6 @@
     text-decoration: none;
     color: #606060;
     font-size: 16px;
-
     padding-bottom: 10px;
     position: relative;
 }
@@ -33,17 +32,6 @@
     color: #000;
     font-weight: bold;
 }
-
-/* 選択しているタブの下線 */
-/* .request-list__tab.is-active::after {
-    content: "";
-    position: absolute;
-    bottom: -1px;
-    left: 0;
-    width: 100%;
-    height: 2px;
-    background-color: #000;
-} */
 
 /* テーブルデザイン */
 .request-list__table {
@@ -67,7 +55,6 @@
 .request-list__label {
     text-align: left;
     padding: 20px;
-    /* background-color: #f8f8f8; */
     color: #606060;
     font-size: 14px;
     font-weight: bold;

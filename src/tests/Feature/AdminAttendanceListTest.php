@@ -12,7 +12,6 @@ class AdminAttendanceListTest extends TestCase
     use RefreshDatabase;
 
     protected $admin;
-    // protected $users;
 
     protected function setUp(): void
     {
@@ -22,9 +21,6 @@ class AdminAttendanceListTest extends TestCase
         $this->admin = User::factory()->admin()->create([
             'name' => '管理者太郎'
         ]);
-
-        // 一般ユーザー3名を作成
-        // $this->users = User::factory()->count(3)->create(['role' => 1]);
     }
 
     /**
@@ -34,7 +30,6 @@ class AdminAttendanceListTest extends TestCase
     {
         $date = Carbon::create(2026, 4, 15);
         $this->travelTo($date);
-        // Carbon::setTestNow($date);
 
         // 3人のユーザーにそれぞれ異なる勤務時間を作成
         $testData = [
@@ -91,7 +86,6 @@ class AdminAttendanceListTest extends TestCase
         }
 
         // 管理者でログインして、勤怠一覧画面を表示
-        // $response = $this->actingAs($this->admin)->get(route('admin.attendance.list', ['date' => $date->format('Y-m-d')]));
         $response = $this->actingAs($this->admin)->get('/admin/attendance/list?date=2026-04-15');
         $response->assertStatus(200);
 
@@ -105,13 +99,6 @@ class AdminAttendanceListTest extends TestCase
                 $data['work'],           // 8:00
             ]);
         }
-        // foreach ($testData as $data) {
-        //     $response->assertSee($data['name']);
-        //     $response->assertSee($data['in']);
-        //     $response->assertSee($data['out']);
-        //     $response->assertSee($data['rest']);
-        //     $response->assertSee($data['work']);
-        // }
     }
 
     /**
@@ -256,7 +243,7 @@ class AdminAttendanceListTest extends TestCase
                 'status' => 3,
             ]);
             $attendance->rests()->create([
-                'break_start' => '14:00:00', // 適当な1時間休憩
+                'break_start' => '14:00:00', // 1時間休憩
                 'break_end' => '15:00:00',
             ]);
         }

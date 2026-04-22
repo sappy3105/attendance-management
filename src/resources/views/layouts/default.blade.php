@@ -18,7 +18,7 @@
                 </a>
             </div>
 
-            {{-- ログインと新規登録画面以外表示する --}}
+            {{-- ログインと新規登録画面以外で表示する --}}
             @unless (request()->routeIs('login', 'register', 'admin.login'))
                 <nav class="header__nav">
                     <ul class="header__nav-list">

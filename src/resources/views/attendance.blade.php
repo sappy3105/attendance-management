@@ -20,14 +20,14 @@
             {{ now()->isoFormat('YYYY年M月D日(ddd)') }}
         </div>
 
-        {{-- 現在の時刻 --}}
+        {{-- 現在の時刻（JSでタイムリーに表示） --}}
         <div class="attendance__time" id="current-time">
             {{ now()->format('H:i') }}
         </div>
 
         {{-- 打刻フォーム --}}
         <div class="attendance__panel">
-            {{-- 1. 勤務外（データなし）の場合 --}}
+            {{-- 勤務外（データなし）の場合 --}}
             @if (!$attendance)
                 <form action="/attendance/check-in" method="post">
                     @csrf
@@ -35,7 +35,7 @@
                     <button class="attendance__button-submit" type="submit">出勤</button>
                 </form>
 
-                {{-- 2. 出勤中の場合：退勤と休憩入を表示 --}}
+                {{-- 出勤中の場合：退勤と休憩入を表示 --}}
             @elseif($attendance->status === 1)
                 <div class="attendance__button-group">
                     <form action="/attendance/check-out" method="post">
@@ -48,14 +48,14 @@
                     </form>
                 </div>
 
-                {{-- 3. 休憩中の場合：休憩戻を表示 --}}
+                {{-- 休憩中の場合：休憩戻を表示 --}}
             @elseif($attendance->status === 2)
                 <form action="/attendance/break-end" method="post">
                     @csrf
                     <button class="attendance__button-rest" type="submit">休憩戻</button>
                 </form>
 
-                {{-- 4. 退勤後の場合：メッセージ表示 --}}
+                {{-- 退勤後の場合：メッセージ表示 --}}
             @elseif($attendance->status === 3)
                 <div class="attendance__message">
                     お疲れ様でした。

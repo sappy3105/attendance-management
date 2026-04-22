@@ -204,7 +204,7 @@ class UserAttendanceUpdateTest extends TestCase
         ]);
 
         // 管理者ユーザーを作成（role=2）
-        $admin = User::factory()->admin()->create();
+        $admin = User::factory()->admin()->create(['role' => 2]);
 
         // 1. 管理者として「申請一覧画面」を確認
         $response = $this->actingAs($admin)->get(route('attendance.requests'));
@@ -363,11 +363,9 @@ class UserAttendanceUpdateTest extends TestCase
         // 申請データをDBから取得
         $correctRequest = AttendanceCorrectRequest::where('remarks', '画面遷移テスト')->first();
 
-        // 一覧にある「詳細」リンクのURLを確認、または実際に叩く
-        // bladeを見ると詳細リンクは {{ route('attendance.approve.status', ...) }}
+        // 一覧にある「詳細」リンクのURLを確認
         $detailUrl = route('attendance.detail', ['id' => $attendance->id]);
-
-        $response->assertSee($detailUrl); // 画面内にURLが存在するか
+        $response->assertSee($detailUrl);
 
         // 詳細リンクへアクセスして、勤怠詳細に移動するか確認
         $transitionResponse = $this->get($detailUrl);

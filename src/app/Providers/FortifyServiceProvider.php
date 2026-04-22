@@ -46,7 +46,7 @@ class FortifyServiceProvider extends ServiceProvider
         // 新規登録後のレスポンス（メール認証誘導画面へ飛ばす設定）
         $this->app->singleton(RegisterResponseContract::class, RegisterResponse::class);
 
-        // ログイン後のレスポンス（未認証なら誘導画面、済みならHOMEへ）
+        // ログイン後のレスポンス（未認証なら誘導画面、済みなら打刻画面へ）
         $this->app->singleton(FortifyLoginResponse::class, MyLoginResponse::class);
 
         // メール認証完了後のレスポンス（打刻画面へ）

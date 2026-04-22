@@ -18,7 +18,7 @@
                 </a>
             </div>
 
-            {{-- ログイン以外表示する --}}
+            {{-- ログイン画面以外表示する --}}
             @unless (request()->routeIs('admin.login'))
                 <nav class="header__nav">
                     <ul class="header__nav-list">

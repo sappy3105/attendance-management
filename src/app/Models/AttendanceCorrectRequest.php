@@ -28,8 +28,7 @@ class AttendanceCorrectRequest extends Model
 
     public function restCorrectRequests()
     {
-        // 第二引数は RestCorrectRequest テーブルにある外部キー名を指定します
-        return $this->hasMany(RestCorrectRequest::class, 'attendance_correct_request_id');
+        return $this->hasMany(RestCorrectRequest::class);
     }
 
     public function user()

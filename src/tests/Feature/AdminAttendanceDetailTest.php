@@ -12,7 +12,7 @@ class AdminAttendanceDetailTest extends TestCase
     use RefreshDatabase;
 
     protected $admin;
-    protected $staff;
+    protected $user;
 
     protected function setUp(): void
     {
@@ -22,7 +22,7 @@ class AdminAttendanceDetailTest extends TestCase
         $this->admin = User::factory()->admin()->create(['name' => '管理者太郎']);
 
         // 一般ユーザー（スタッフ）を作成
-        $this->staff = User::factory()->create(['name' => 'テストスタッフ', 'role' => 1]);
+        $this->user = User::factory()->create(['name' => 'テストスタッフ', 'role' => 1]);
     }
 
     /**
@@ -34,7 +34,7 @@ class AdminAttendanceDetailTest extends TestCase
         $this->travelTo($date);
 
         // テスト用勤怠データ作成
-        $attendance = $this->staff->attendances()->create([
+        $attendance = $this->user->attendances()->create([
             'date'      => $date->format('Y-m-d'),
             'check_in'  => '09:00:00',
             'check_out' => '18:00:00',
@@ -52,7 +52,7 @@ class AdminAttendanceDetailTest extends TestCase
         $response->assertStatus(200);
         $response->assertSeeInOrder([
             '名前',
-            $this->staff->name,
+            $this->user->name,
             '日付',
             '2026年',
             '4月15日',
@@ -75,7 +75,7 @@ class AdminAttendanceDetailTest extends TestCase
         $date = Carbon::create(2026, 4, 15);
         $this->travelTo($date);
 
-        $attendance = $this->staff->attendances()->create([
+        $attendance = $this->user->attendances()->create([
             'date' => $date,
             'check_in'  => '09:00:00',
             'check_out' => '18:00:00',
@@ -112,7 +112,7 @@ class AdminAttendanceDetailTest extends TestCase
         $date = Carbon::create(2026, 4, 15);
         $this->travelTo($date);
 
-        $attendance = $this->staff->attendances()->create([
+        $attendance = $this->user->attendances()->create([
             'date' => $date,
             'check_in'  => '09:00:00',
             'check_out' => '18:00:00',
@@ -151,7 +151,7 @@ class AdminAttendanceDetailTest extends TestCase
         $date = Carbon::create(2026, 4, 15);
         $this->travelTo($date);
 
-        $attendance = $this->staff->attendances()->create([
+        $attendance = $this->user->attendances()->create([
             'date' => $date,
             'check_in' => '09:00:00',
             'check_out' => '18:00:00',
@@ -189,7 +189,7 @@ class AdminAttendanceDetailTest extends TestCase
         $date = Carbon::create(2026, 4, 15);
         $this->travelTo($date);
 
-        $attendance = $this->staff->attendances()->create([
+        $attendance = $this->user->attendances()->create([
             'date' => $date,
             'check_in' => '09:00:00',
             'check_out' => '18:00:00',

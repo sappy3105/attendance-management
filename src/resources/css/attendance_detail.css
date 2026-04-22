@@ -70,8 +70,7 @@
 }
 
 .attendance-detail__date-year {
-    width: 130px;
-    /* .attendance-detail__input と同じ幅 */
+    width: 130px; /* .attendance-detail__input と同じ幅 */
     text-align: center;
     font-size: 18px;
     font-weight: bold;
@@ -81,7 +80,6 @@
 
 .attendance-detail__date-separator {
     width: 80px;
-    /* ここの数値で「月日」の開始位置を微調整してください */
     display: inline-block;
 }
 
@@ -100,7 +98,7 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 /* 入力エリアのスタイル */
 .attendance-detail__item-group {
     display: flex;
-    align-items: flex-start; /* エラーが複数行になっても入力欄は上に固定 */
+    align-items: flex-start;
     gap: 20px; /* 入力欄とエラーの間の余白 */
     width: 100%;
 }
@@ -152,15 +150,8 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 }
 
 .error-item {
-    display: block; /* 確実に改行させる */
+    display: block;
     margin-bottom: 4px; /* エラー同士が近すぎないように微調整 */
-}
-
-/* いらないかも */
-.attendance-detail__pending-msg {
-    color: #ff4d4b;
-    font-weight: bold;
-    margin-bottom: 10px;
 }
 
 /* テキスト表示時のスタイル */
@@ -171,8 +162,7 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 
 .attendance-detail__text-time {
     display: inline-block;
-    width: 130px;
-    /* inputと同じ幅 */
+    width: 130px; /* inputと同じ幅 */
     text-align: center;
     font-size: 18px;
     font-weight: bold;

@@ -84,7 +84,7 @@ Route::middleware('auth', 'verified')->group(function () {
     // 管理者用（URLにadminなし）
     Route::middleware(AdminMiddleware::class)->group(function () {
 
-        // 修正申請承認画面（URLから admin が消える！）
+        // 修正申請承認画面
         Route::get('/stamp_correction_request/approve/{attendance_correct_request_id}', [AdminAttendanceController::class, 'showApprove'])
             ->name('admin.attendance.approve.show');
 

@@ -12,7 +12,7 @@ class AdminStaffAttendanceTest extends TestCase
     use RefreshDatabase;
 
     protected $admin;
-    protected $staff;
+    protected $user;
 
     protected function setUp(): void
     {
@@ -22,7 +22,7 @@ class AdminStaffAttendanceTest extends TestCase
         $this->admin = User::factory()->admin()->create(['name' => '管理者太郎']);
 
         // テスト対象のスタッフを作成
-        $this->staff = User::factory()->create([
+        $this->user = User::factory()->create([
             'name' => 'テストスタッフ1',
             'email' => 'staff1@example.com',
             'role' => 1
@@ -59,7 +59,7 @@ class AdminStaffAttendanceTest extends TestCase
         $this->travelTo($date);
 
         // 勤怠データ作成
-        $attendance = $this->staff->attendances()->create([
+        $attendance = $this->user->attendances()->create([
             'date'      => $date->format('Y-m-d'),
             'check_in'  => '09:00:00',
             'check_out' => '18:00:00',
@@ -72,14 +72,14 @@ class AdminStaffAttendanceTest extends TestCase
 
         // スタッフ一覧画面を開き、詳細ボタンリンクが存在しているか確認
         $response = $this->actingAs($this->admin)->get(route('admin.staff.list'));
-        $response->assertSee(route('admin.staff.attendance', ['id' => $this->staff->id]));
+        $response->assertSee(route('admin.staff.attendance', ['id' => $this->user->id]));
 
         // 詳細リンクへ遷移
-        $response = $this->actingAs($this->admin)->get(route('admin.staff.attendance', ['id' => $this->staff->id]));
+        $response = $this->actingAs($this->admin)->get(route('admin.staff.attendance', ['id' => $this->user->id]));
 
         // 勤怠情報を確認
         $response->assertStatus(200);
-        $response->assertSee($this->staff->name . 'さんの勤怠');
+        $response->assertSee($this->user->name . 'さんの勤怠');
         $response->assertSee('2026/04'); // カレンダー選択部分
         $response->assertSeeInOrder([
             $date->isoFormat('MM/DD(ddd)'),
@@ -103,7 +103,7 @@ class AdminStaffAttendanceTest extends TestCase
         $prevMonthDate = Carbon::create(2026, 3, 15);
 
         // 前月（3月15日）のデータを作成
-        $attendance = $this->staff->attendances()->create([
+        $attendance = $this->user->attendances()->create([
             'date' => $prevMonthDate->format('Y-m-d'),
             'check_in' => '09:00:00',
             'check_out' => '18:00:00',
@@ -116,7 +116,7 @@ class AdminStaffAttendanceTest extends TestCase
 
         // 前月にアクセス
         $response = $this->actingAs($this->admin)->get(route('admin.staff.attendance', [
-            'id' => $this->staff->id,
+            'id' => $this->user->id,
             'month' => $prevMonth->format('Y-m')
         ]));
 
@@ -144,7 +144,7 @@ class AdminStaffAttendanceTest extends TestCase
         $nextMonthDate = Carbon::create(2026, 5, 15);
 
         // 翌月（5月15日）のデータを作成
-        $attendance = $this->staff->attendances()->create([
+        $attendance = $this->user->attendances()->create([
             'date' => $nextMonthDate->format('Y-m-d'),
             'check_in' => '08:30:00',
             'check_out' => '17:30:00',
@@ -157,7 +157,7 @@ class AdminStaffAttendanceTest extends TestCase
 
         // 翌月にアクセス
         $response = $this->actingAs($this->admin)->get(route('admin.staff.attendance', [
-            'id' => $this->staff->id,
+            'id' => $this->user->id,
             'month' => $nextMonth->format('Y-m')
         ]));
 
@@ -181,7 +181,7 @@ class AdminStaffAttendanceTest extends TestCase
         $this->travelTo($date);
 
         // 勤怠データを作成
-        $attendance = $this->staff->attendances()->create([
+        $attendance = $this->user->attendances()->create([
             'date' => $date->format('Y-m-d'),
             'check_in' => '09:30:00',
             'check_out' => '18:00:00',
@@ -193,7 +193,7 @@ class AdminStaffAttendanceTest extends TestCase
         ]);
 
         // スタッフ別勤怠一覧画面を開き、詳細ボタンリンクが存在しているか確認
-        $response = $this->actingAs($this->admin)->get(route('admin.staff.attendance', ['id' => $this->staff->id]));
+        $response = $this->actingAs($this->admin)->get(route('admin.staff.attendance', ['id' => $this->user->id]));
         $response->assertSee(route('admin.attendance.detail', ['id' => $attendance->id]));
 
         // 勤怠詳細画面へアクセス
