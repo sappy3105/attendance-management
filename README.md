@@ -68,6 +68,39 @@ make build
 docker-compose exec php npm install postcss-loader autoprefixer --save-dev
 ```
 
+## テストの実行とトラブルシューティング
+
+#### テストの実行方法
+
+以下のコマンドで、アプリケーションのテストを実行できます。
+
+```bash
+docker-compose exec php php artisan test
+```
+
+#### トラブルシューティング（テストが失敗する場合）
+
+環境によって設定がキャッシュされ、テスト用データベース（SQLite）への切り替えがうまくいかず、接続エラーが発生する場合があります。その際は、以下の手順でキャッシュのリセットを行ってください。
+
+**1. キャッシュファイルの物理削除**
+
+```bash
+docker-compose exec php rm -f storage/framework/cache/config.php
+```
+
+**2. オートロードの再生成**
+
+```bash
+docker-compose exec php composer dump-autoload
+```
+
+**3. 設定キャッシュのクリア**
+
+```bash
+docker-compose exec php php artisan config:clear
+```
+※ make init を実行しても問題が解決しない場合も、上記の手順を試してください。
+
 ## 使用技術（実行環境）
 
 - PHP 8.3.30
