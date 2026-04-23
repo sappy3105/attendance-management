@@ -41,9 +41,9 @@ MAIL_PASSWORD=確認したパスワード
 MAIL_DASHBOARD_URL=「My Sandbox」ページのURL
 ```
 
-**3. アプリケーションの初期化**
+**3. 設定の反映（キャッシュの更新）**
 
-以下のコマンドを実行して、アプリケーションの初期化を行います。
+以下のコマンドを実行して、設定の反映を行います。
 
 ```bash
 make cache
@@ -80,7 +80,8 @@ docker-compose exec php php artisan test
 
 #### トラブルシューティング（テストが失敗する場合）
 
-環境によって設定がキャッシュされ、テスト用データベース（SQLite）への切り替えがうまくいかず、接続エラーが発生する場合があります。その際は、以下の手順でキャッシュのリセットを行ってください。
+環境によって設定がキャッシュされ、テスト用DB（SQLite）への切り替えがうまくいかない場合があります。  
+make init 後にエラーが出る際は、以下の 3 つのコマンドを順番に実行してください。
 
 **1. キャッシュファイルの物理削除**
 
@@ -99,7 +100,6 @@ docker-compose exec php composer dump-autoload
 ```bash
 docker-compose exec php php artisan config:clear
 ```
-※ make init を実行しても問題が解決しない場合も、上記の手順を試してください。
 
 ## 使用技術（実行環境）
 
