@@ -28,7 +28,7 @@
 2. ログイン後、左メニューの「Sandboxes」→「My Sandbox」をクリックします。
 3. 「Integration」タブが選択されていることを確認し、その下の「SMTP」を選択します。
 4. 表示された `Credentials` 欄の `Username` と `Password` を確認します。
-5. 「My Sandbox」ページのURL(`https://mailtrap.io/inboxes/数字/messages`) をコピーします。
+5. 「My Sandbox」ページのURL(`https://mailtrap.io/inboxes/数字/settings`) をコピーします。
 
 **2. 環境設定 (.env)**
 
