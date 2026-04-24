@@ -4,12 +4,11 @@
 
 ### 1. リポジトリのクローンと環境準備
 
-1. プロジェクトをクローンし、Dockerコンテナを起動します。
+1. プロジェクトをクローンします。
 
    ```bash
    git clone git@github.com:sappy3105/attendance-management.git
    cd attendance-management
-   docker-compose up -d --build
    ```
 
 2. プロジェクト直下で、以下のコマンドを実行します。
