@@ -62,10 +62,12 @@ make dev
 make build
 ```
 
-もし `make dev` でエラーが出る場合は、以下のコマンドを試してから再度ビルドしてください。
+※もし `make dev` や `make build` でエラーが発生し、起動できない場合は、以下の手順で依存パッケージとキャッシュを完全にリセットしてください。
 
 ```bash
-docker-compose exec php npm install postcss-loader autoprefixer --save-dev
+# node_modulesを削除して再インストール
+docker-compose exec php rm -rf node_modules package-lock.json
+docker-compose exec php npm install
 ```
 
 ## テストの実行とトラブルシューティング
