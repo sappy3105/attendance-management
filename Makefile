@@ -4,6 +4,7 @@ init:
 	docker compose exec php composer install
 	docker compose exec php npm install
 	docker compose exec php php artisan key:generate
+	docker compose exec php php artisan config:clear
 	@make fresh
 
 fresh:
@@ -21,10 +22,6 @@ restart:
 
 config-clear:
 	docker compose exec php php artisan config:clear
-
-cache:
-	docker compose exec php php artisan cache:clear
-	docker compose exec php php artisan config:cache
 
 stop:
 	docker compose stop
