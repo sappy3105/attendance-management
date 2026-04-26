@@ -45,7 +45,7 @@ MAIL_DASHBOARD_URL=「My Sandbox」ページのURL
 以下のコマンドを実行して、設定の反映を行います。
 
 ```bash
-make cache
+make config-clear
 ```
 
 ### 3. フロントエンドの環境構築

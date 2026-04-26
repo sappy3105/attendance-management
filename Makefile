@@ -5,9 +5,6 @@ init:
 	docker-compose exec php npm install
 	docker-compose exec php php artisan key:generate
 	@make fresh
-	docker-compose exec php rm -f storage/framework/cache/config.php
-	docker-compose exec php composer dump-autoload
-	docker-compose exec php php artisan config:clear
 
 fresh:
 	docker compose exec php php artisan migrate:fresh --seed
@@ -21,6 +18,9 @@ down:
 restart:
 	@make down
 	@make up
+
+config-clear:
+	docker-compose exec php php artisan config:clear
 
 cache:
 	docker-compose exec php php artisan cache:clear
